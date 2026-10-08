@@ -2,6 +2,7 @@
 // before the DB closes, and the next process must recover using those receipts.
 import { gate, Reply, stub, tag } from "./setup.ts";
 import assert from "node:assert/strict";
+import { promptText } from "@aihot/backend/editorial/prompts";
 import { spawn } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import { after, before, test } from "node:test";
@@ -25,7 +26,7 @@ let active: {
 const provider = await stub(async (_hit, request) => {
   const body = JSON.parse(request.body);
   const system = String(body.messages[0]?.content ?? "");
-  const step: Step = system.includes("宽召回的AI相关性预筛") ? "prefilter" : system.includes("事件注意力评分器") ? "score"
+  const step: Step = system === promptText("prefilter") ? "prefilter" : system === promptText("selection-score") ? "score"
     : system.includes("资料结构化助手") ? "structure" : "understand";
   active.calls.push(step);
   const count = active.calls.filter(s => s === step).length;
@@ -37,8 +38,8 @@ const provider = await stub(async (_hit, request) => {
   if (step === "understand" && active.writingAnswer) { active.writingAsked!.open(); await active.writingAnswer.promise; }
   const content = step === "prefilter" ? { label: "PASS", reason: "AI model release" }
     : step === "score" ? { attentionScore: 80 }
-      : step === "structure" ? { category: "ai-models", tags: ["模型发布"], subjects: [], fact: { title: "新模型发布" } }
-        : { itemType: "model_release", authorRole: "principal", tags: ["模型发布"], editorialJudgment: "模型有明确的能力提升", titleZh: `新模型发布 ${T}`, summaryZh: "模型发布并提供了评测和价格。" };
+      : step === "structure" ? { category: "results", tags: ["评测结果"], subjects: [], fact: { title: "新评测结果" } }
+        : { itemType: "model_release", authorRole: "principal", tags: ["评测结果"], editorialJudgment: "模型有明确的能力提升", titleZh: `新评测结果 ${T}`, summaryZh: "评测结果并提供了评测和价格。" };
   return { id: `stub-${active.calls.length}`, choices: [{ message: { content: JSON.stringify(content) } }], usage: { prompt_tokens: 10, completion_tokens: 10, total_tokens: 20 } };
 });
 const children = new Set<ReturnType<typeof spawn>>();

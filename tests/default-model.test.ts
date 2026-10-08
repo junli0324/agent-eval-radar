@@ -2,6 +2,7 @@
 // step of the analysis, with no per-step configuration.
 import { stub, tag } from "./setup.ts";
 import assert from "node:assert/strict";
+import { promptText } from "@aihot/backend/editorial/prompts";
 import { after, before, test } from "node:test";
 import { closeDb, sql } from "@aihot/backend/db";
 import { upsertMaterial } from "@aihot/backend/content/materials";
@@ -20,10 +21,10 @@ const provider = await stub((_hit, req) => {
   const user = String(body.messages.at(-1)!.content);
   seen.push({ model: body.model, system });
   const content =
-    system.includes("宽召回") ? { label: "PASS", reason: "测试" }
-    : system.includes("事件注意力评分器") ? { attentionScore: 80 }
-    : system.includes("内容理解编辑") ? { itemType: "product_launch", authorRole: "principal", tags: ["产品更新"], editorialJudgment: "理由", titleZh: "一个模型的标题", summaryZh: "一个模型写的摘要。第二句。" }
-    : system.includes("资料结构化助手") ? { category: "ai-products", tags: ["产品更新"], subjects: [], fact: null }
+    system === promptText("prefilter") ? { label: "PASS", reason: "测试" }
+    : system === promptText("selection-score") ? { attentionScore: 80 }
+    : system.includes("内容理解编辑") ? { itemType: "product_launch", authorRole: "principal", tags: ["工具框架"], editorialJudgment: "理由", titleZh: "一个模型的标题", summaryZh: "一个模型写的摘要。第二句。" }
+    : system.includes("资料结构化助手") ? { category: "tools", tags: ["工具框架"], subjects: [], fact: null }
     : user.includes("title_zh") ? "title_zh: 标题\nsummary_zh: 摘要。"
     : null;
   if (content === null) throw new Error("unexpected request");
