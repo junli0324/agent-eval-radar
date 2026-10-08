@@ -1,494 +1,151 @@
 {
-  "exportedAt": "2026-09-26",
+  "exportedAt": "2026-09-30",
   "groups": [
     {
-      "key": "company",
-      "name": "公司与模型",
-      "blurb": "按厂商与模型系追踪：谁发了什么、又赢了哪一局"
-    },
-    {
       "key": "field",
-      "name": "技术方向",
-      "blurb": "按技术领域深挖：Agent、多模态、具身智能……"
+      "name": "Agent 场景",
+      "blurb": "按任务场景跟踪能力边界与评测进展"
     },
     {
       "key": "genre",
-      "name": "内容形态",
-      "blurb": "按内容类型浏览：论文、教程、观点、政策……"
+      "name": "情报分类",
+      "blurb": "从基准、方法、论文、工具、结果与实践查找资料"
+    },
+    {
+      "key": "company",
+      "name": "研究机构",
+      "blurb": "按主体追踪评测相关工作，机构名气不代表证据质量"
     }
   ],
   "topics": [
     {
-      "slug": "openai",
-      "name": "OpenAI / ChatGPT",
-      "group": "company",
-      "entityId": "openai",
-      "tags": [
-        "OpenAI",
-        "entity:openai"
-      ],
-      "definition": "OpenAI 的全部动态：GPT 系列模型、ChatGPT 与 Sora 产品、公司战略与人事的持续追踪。",
-      "related": [
-        "anthropic",
-        "google",
-        "model-releases"
-      ]
-    },
-    {
-      "slug": "anthropic",
-      "name": "Anthropic / Claude",
-      "group": "company",
-      "entityId": "anthropic",
-      "tags": [
-        "Anthropic",
-        "entity:anthropic"
-      ],
-      "definition": "Anthropic 的全部动态：Claude 系列模型、Claude Code、安全研究路线与公司进展的持续追踪。",
-      "related": [
-        "openai",
-        "google",
-        "safety"
-      ]
-    },
-    {
-      "slug": "google",
-      "name": "Google / Gemini",
-      "group": "company",
-      "entityId": "google",
-      "tags": [
-        "Google",
-        "DeepMind",
-        "entity:google"
-      ],
-      "definition": "Google 与 DeepMind 的 AI 动态：Gemini 系列、Veo 视频模型、研究成果与产品生态的持续追踪。",
-      "related": [
-        "openai",
-        "anthropic",
-        "multimodal"
-      ]
-    },
-    {
-      "slug": "deepseek",
-      "name": "DeepSeek",
-      "group": "company",
-      "entityId": "deepseek",
-      "tags": [
-        "DeepSeek",
-        "entity:deepseek"
-      ],
-      "definition": "DeepSeek（深度求索）的模型发布、开源权重与技术报告——开源大模型价格与性能双卷的风向标。",
-      "related": [
-        "qwen",
-        "open-source",
-        "model-releases"
-      ]
-    },
-    {
-      "slug": "qwen",
-      "name": "千问 Qwen",
-      "group": "company",
-      "entityId": "qwen",
-      "tags": [
-        "entity:qwen"
-      ],
-      "definition": "阿里千问 Qwen 系列的开源发布与迭代：从旗舰模型到端侧小模型的全谱系动态。",
-      "related": [
-        "deepseek",
-        "kimi",
-        "open-source"
-      ]
-    },
-    {
-      "slug": "kimi",
-      "name": "Kimi / 月之暗面",
-      "group": "company",
-      "entityId": "kimi",
-      "tags": [
-        "entity:kimi"
-      ],
-      "definition": "月之暗面 Kimi 系列模型与产品动态：K 系列开源模型、长上下文技术与产品演进的追踪。",
-      "related": [
-        "qwen",
-        "deepseek",
-        "minimax"
-      ]
-    },
-    {
-      "slug": "minimax",
-      "name": "MiniMax",
-      "group": "company",
-      "entityId": "minimax",
-      "tags": [
-        "entity:minimax"
-      ],
-      "definition": "MiniMax 的模型与产品动态：M 系列大模型、语音与多模态能力、开源与商业化进展。",
-      "related": [
-        "kimi",
-        "qwen",
-        "voice"
-      ]
-    },
-    {
-      "slug": "zhipu",
-      "name": "智谱 GLM",
-      "group": "company",
-      "entityId": "zhipu",
-      "tags": [
-        "entity:zhipu"
-      ],
-      "definition": "智谱的 GLM 系列模型动态：旗舰开源发布、代码与推理能力迭代、商业化与生态进展的追踪。",
-      "related": [
-        "qwen",
-        "kimi",
-        "open-source"
-      ]
-    },
-    {
-      "slug": "xai",
-      "name": "xAI / Grok",
-      "group": "company",
-      "entityId": "xai",
-      "tags": [
-        "xAI",
-        "entity:xai"
-      ],
-      "definition": "马斯克 xAI 与 Grok 系列的全部动态：模型迭代、算力扩张与 X 平台整合的持续追踪。",
-      "related": [
-        "openai",
-        "meta",
-        "industry"
-      ]
-    },
-    {
-      "slug": "meta",
-      "name": "Meta / Llama",
-      "group": "company",
-      "entityId": "meta",
-      "tags": [
-        "Meta",
-        "entity:meta"
-      ],
-      "definition": "Meta 的 AI 动态：Llama 开源模型系列、超级智能实验室与元宇宙之外的 AI 豪赌。",
-      "related": [
-        "xai",
-        "open-source",
-        "industry"
-      ]
-    },
-    {
-      "slug": "microsoft",
-      "name": "Microsoft / Copilot",
-      "group": "company",
-      "entityId": "microsoft",
-      "tags": [
-        "Microsoft",
-        "entity:microsoft"
-      ],
-      "definition": "微软的 AI 布局：Copilot 全家桶、Azure AI 基础设施与 OpenAI 合作关系的持续追踪。",
-      "related": [
-        "openai",
-        "coding",
-        "product-updates"
-      ]
-    },
-    {
-      "slug": "nvidia",
-      "name": "NVIDIA 英伟达",
-      "group": "company",
-      "entityId": "nvidia",
-      "tags": [
-        "entity:nvidia"
-      ],
-      "definition": "英伟达的 AI 芯片与生态动态：GPU 新品、CUDA 生态、机器人平台与 AI 算力市场的风向。",
-      "related": [
-        "engineering",
-        "industry",
-        "embodied"
-      ]
-    },
-    {
-      "slug": "hugging-face",
-      "name": "Hugging Face",
-      "group": "company",
-      "entityId": "hugging-face",
-      "tags": [
-        "Hugging Face",
-        "entity:hugging-face"
-      ],
-      "definition": "Hugging Face 开源社区动态：热门模型与数据集、排行榜变化与开源生态的晴雨表。",
-      "related": [
-        "open-source",
-        "model-releases",
-        "data-training"
-      ]
-    },
-    {
-      "slug": "cursor",
-      "name": "Cursor",
-      "group": "company",
-      "entityId": "cursor",
-      "tags": [
-        "entity:cursor"
-      ],
-      "definition": "Cursor 编辑器的产品迭代与生态动态——AI 编码工具竞争中最受关注的玩家之一。",
-      "related": [
-        "coding",
-        "agent",
-        "product-updates"
-      ]
-    },
-    {
-      "slug": "openrouter",
-      "name": "OpenRouter",
-      "group": "company",
-      "entityId": "openrouter",
-      "tags": [
-        "entity:openrouter"
-      ],
-      "definition": "OpenRouter 模型路由平台动态：新模型上架、用量排行与开发者选型的真实市场信号。",
-      "related": [
-        "engineering",
-        "model-releases",
-        "open-source"
-      ]
-    },
-    {
-      "slug": "agent",
-      "name": "Agent 智能体",
+      "slug": "code-agent",
+      "name": "Code Agent",
       "group": "field",
       "tags": [
-        "Agent"
+        "Code Agent"
       ],
-      "definition": "让模型自主规划、调用工具、完成多步任务的技术方向——从 Claude Code、Manus 到各家 Agent 框架与评测基准的全部动态。",
+      "definition": "追踪 Code Agent 的评测基准、方法、结果和实践，关注代码修改、仓库任务、测试与补丁验证。",
       "related": [
-        "mcp",
-        "coding",
-        "reasoning"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "coding",
-      "name": "AI 编码",
+      "slug": "browser-agent",
+      "name": "Browser Agent",
       "group": "field",
       "tags": [
-        "编码"
+        "Browser Agent"
       ],
-      "definition": "AI 写代码的一切：编码助手、Vibe Coding、代码模型评测与开发工作流变革。",
+      "definition": "追踪 Browser Agent 的评测基准、方法、结果和实践，关注网页导航、信息提取与跨页面任务。",
       "related": [
-        "agent",
-        "cursor",
-        "tutorials"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "reasoning",
-      "name": "推理能力",
+      "slug": "computer-use",
+      "name": "Computer Use",
       "group": "field",
       "tags": [
-        "推理"
+        "Computer Use"
       ],
-      "definition": "模型推理能力的进展：思维链、推理模型、数学与逻辑基准的突破与争议。",
+      "definition": "追踪 Computer Use 的评测基准、方法、结果和实践，关注桌面 GUI 操作、视觉定位与环境状态。",
       "related": [
-        "papers",
-        "model-releases",
-        "agent"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "multimodal",
-      "name": "多模态",
+      "slug": "tool-api-agent",
+      "name": "Tool/API Agent",
       "group": "field",
       "tags": [
-        "多模态"
+        "Tool/API Agent"
       ],
-      "definition": "文本之外的能力：视觉理解、图文混合、音视频输入输出的模型与产品进展。",
+      "definition": "追踪 Tool/API Agent 的评测基准、方法、结果和实践，关注工具选择、参数调用、API 协作与失败恢复。",
       "related": [
-        "image-gen",
-        "video",
-        "voice"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "image-gen",
-      "name": "图像生成",
+      "slug": "research-agent",
+      "name": "Research Agent",
       "group": "field",
       "tags": [
-        "图像生成"
+        "Research Agent"
       ],
-      "definition": "AI 画图的最前线：文生图模型迭代、图像编辑能力与创作工具生态的全部动态。",
+      "definition": "追踪 Research Agent 的评测基准、方法、结果和实践，关注检索、证据整合、引用与研究任务完成度。",
       "related": [
-        "video",
-        "multimodal",
-        "product-updates"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "video",
-      "name": "AI 视频",
+      "slug": "customer-service-agent",
+      "name": "Customer Service Agent",
       "group": "field",
       "tags": [
-        "视频"
+        "Customer Service Agent"
       ],
-      "definition": "AI 视频生成与理解：文生视频模型、视频编辑工具与影视创作变革的追踪。",
+      "definition": "追踪 Customer Service Agent 的评测基准、方法、结果和实践，关注多轮客服、业务规则遵循与工具操作。",
       "related": [
-        "image-gen",
-        "multimodal",
-        "voice"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "voice",
-      "name": "语音与音频",
+      "slug": "terminal-agent",
+      "name": "Terminal Agent",
       "group": "field",
       "tags": [
-        "语音"
+        "Terminal Agent"
       ],
-      "definition": "AI 语音与音频的进展：语音合成、实时对话、音乐生成与音频理解的模型与产品。",
+      "definition": "追踪 Terminal Agent 的评测基准、方法、结果和实践，关注终端命令、环境配置与可执行结果验证。",
       "related": [
-        "multimodal",
-        "video",
-        "product-updates"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "embodied",
-      "name": "具身智能",
+      "slug": "multi-agent",
+      "name": "Multi-Agent",
       "group": "field",
       "tags": [
-        "具身智能"
+        "Multi-Agent"
       ],
-      "definition": "AI 走进物理世界：人形机器人、具身基础模型与真实环境操作能力的进展追踪。",
+      "definition": "追踪 Multi-Agent 的评测基准、方法、结果和实践，关注多 Agent 协作、分工、通信与集体失败模式。",
       "related": [
-        "nvidia",
-        "multimodal",
-        "papers"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "on-device",
-      "name": "端侧 AI",
+      "slug": "generalist-agent",
+      "name": "Generalist Agent",
       "group": "field",
       "tags": [
-        "端侧"
+        "Generalist Agent"
       ],
-      "definition": "跑在手机、电脑与边缘设备上的 AI：小模型、本地推理与端侧芯片的进展。",
+      "definition": "追踪 Generalist Agent 的评测基准、方法、结果和实践，关注跨场景综合任务与能力迁移。",
       "related": [
-        "engineering",
-        "open-source",
-        "model-releases"
+        "benchmarks",
+        "methods"
       ]
     },
     {
-      "slug": "open-source",
-      "name": "开源生态",
+      "slug": "memory-long-horizon",
+      "name": "Memory/Long-horizon",
       "group": "field",
       "tags": [
-        "开源生态",
-        "开源/仓库"
+        "Memory/Long-horizon"
       ],
-      "definition": "开源模型、框架与仓库动态：权重开放、社区项目爆火、开源与闭源的力量消长。",
+      "definition": "追踪 Memory/Long-horizon 的评测基准、方法、结果和实践，关注长期记忆、状态维护、长时程规划与任务恢复。",
       "related": [
-        "model-releases",
-        "hugging-face",
-        "coding"
-      ]
-    },
-    {
-      "slug": "engineering",
-      "name": "部署工程",
-      "group": "field",
-      "tags": [
-        "部署/工程"
-      ],
-      "definition": "把模型跑起来的工程实践：推理优化、显存与成本、Serving 架构与基础设施选型。",
-      "related": [
-        "open-source",
-        "data-training",
-        "on-device"
-      ]
-    },
-    {
-      "slug": "data-training",
-      "name": "数据与训练",
-      "group": "field",
-      "tags": [
-        "数据/训练"
-      ],
-      "definition": "训练侧的门道：数据集构建、合成数据、预训练与后训练方法、算力与训练成本。",
-      "related": [
-        "papers",
-        "engineering",
-        "model-releases"
-      ]
-    },
-    {
-      "slug": "safety",
-      "name": "安全对齐",
-      "group": "field",
-      "tags": [
-        "安全/对齐"
-      ],
-      "definition": "AI 安全与对齐：越狱与防御、模型行为研究、安全评测与治理框架的进展。",
-      "related": [
-        "papers",
-        "policy",
-        "reasoning"
-      ]
-    },
-    {
-      "slug": "mcp",
-      "name": "MCP 与工具调用",
-      "group": "field",
-      "tags": [
-        "MCP/工具调用"
-      ],
-      "definition": "模型连接外部世界的协议与实践：MCP 生态、function calling、工具链集成的动态。",
-      "related": [
-        "agent",
-        "coding",
-        "open-source"
-      ]
-    },
-    {
-      "slug": "model-releases",
-      "name": "模型发布",
-      "group": "genre",
-      "tags": [
-        "模型发布"
-      ],
-      "definition": "新模型的发布、开源与迭代：大模型厂商的旗舰更新、开源权重放出、性能与价格变化的第一时间记录。",
-      "related": [
-        "product-updates",
-        "papers",
-        "open-source"
-      ]
-    },
-    {
-      "slug": "product-updates",
-      "name": "产品更新",
-      "group": "genre",
-      "tags": [
-        "产品更新"
-      ],
-      "definition": "AI 产品与应用的功能上新、改版与商业化动态——谁家的产品变强了、变贵了、能用了。",
-      "related": [
-        "model-releases",
-        "industry",
-        "coding"
-      ]
-    },
-    {
-      "slug": "papers",
-      "name": "论文研究",
-      "group": "genre",
-      "tags": [
-        "论文/研究"
-      ],
-      "definition": "值得读的 AI 论文与研究成果：架构创新、训练方法、能力测量与理论进展的精选解读。",
-      "related": [
-        "reasoning",
-        "safety",
-        "data-training"
+        "benchmarks",
+        "methods"
       ]
     },
     {
@@ -496,82 +153,119 @@
       "name": "评测基准",
       "group": "genre",
       "tags": [
-        "评测/基准"
+        "评测基准"
       ],
-      "definition": "模型到底谁强：Benchmark 成绩、评测方法论争议与排行榜变化的持续记录。",
+      "definition": "Benchmark、评测数据集、任务环境的首次发布或实质版本更新；论文提出新基准时优先归此类",
       "related": [
-        "model-releases",
-        "papers",
-        "reasoning"
+        "code-agent",
+        "tool-api-agent"
       ]
     },
     {
-      "slug": "tutorials",
-      "name": "教程实践",
+      "slug": "methods",
+      "name": "评测方法",
       "group": "genre",
       "tags": [
-        "教程/实践"
+        "评测方法"
       ],
-      "definition": "拿来就能用的实操内容：提示词技巧、工作流搭建、工具用法与踩坑经验。",
+      "definition": "指标、评分协议、LLM-as-Judge 校准、轨迹分析、统计检验与评测污染识别；以方法贡献为核心",
       "related": [
-        "coding",
-        "agent",
-        "product-updates"
+        "code-agent",
+        "tool-api-agent"
       ]
     },
     {
-      "slug": "opinions",
-      "name": "大佬观点",
+      "slug": "paper",
+      "name": "论文研究",
       "group": "genre",
       "tags": [
-        "大佬观点"
+        "论文研究"
       ],
-      "definition": "行业关键人物在想什么：创始人访谈、研究者论战、投资人判断的观点集合。",
+      "definition": "Agent Evaluation 的研究论文、综述与技术报告；核心是研究发现，非基准或方法发布",
       "related": [
-        "trends",
-        "industry"
+        "code-agent",
+        "tool-api-agent"
       ]
     },
     {
-      "slug": "trends",
-      "name": "现象与趋势",
+      "slug": "tools",
+      "name": "工具框架",
       "group": "genre",
       "tags": [
-        "现象/趋势"
+        "工具框架"
       ],
-      "definition": "正在发生的行业级变化：使用习惯迁移、能力涌现、社会影响与市场格局的观察。",
+      "definition": "评测 Harness、测试框架、实验追踪、数据标注、回归与红队工具的发布或实质更新",
       "related": [
-        "opinions",
-        "industry",
-        "safety"
+        "code-agent",
+        "tool-api-agent"
       ]
     },
     {
-      "slug": "industry",
-      "name": "行业动态",
+      "slug": "results",
+      "name": "评测结果",
       "group": "genre",
       "tags": [
-        "行业动态"
+        "评测结果"
       ],
-      "definition": "AI 行业的商业脉搏：融资并购、人事变动、合作与竞争、政策与市场信号。",
+      "definition": "在已有基准或真实任务上报告 Agent 成绩、独立复现、失败分析与能力边界；不得混淆版本与设置",
       "related": [
-        "trends",
-        "opinions",
-        "policy"
+        "code-agent",
+        "tool-api-agent"
       ]
     },
     {
-      "slug": "policy",
-      "name": "政策监管",
+      "slug": "practice",
+      "name": "实践观点",
       "group": "genre",
       "tags": [
-        "政策/监管"
+        "实践观点"
       ],
-      "definition": "AI 相关政策法规与政府监管动态：立法进展、出口管制与全球治理框架的追踪。",
+      "definition": "评测落地经验、案例复盘、方法论观点与教程；应有具体评测问题、证据或可迁移做法",
       "related": [
-        "industry",
-        "safety",
-        "trends"
+        "code-agent",
+        "tool-api-agent"
+      ]
+    },
+    {
+      "slug": "openai",
+      "name": "OpenAI",
+      "group": "company",
+      "entityId": "openai",
+      "tags": [
+        "entity:openai"
+      ],
+      "definition": "仅追踪 OpenAI 的 Agent Evaluation 相关研究、评测协议、结果与工程实践。一般产品与公司新闻不因主体身份入选。",
+      "related": [
+        "methods",
+        "results"
+      ]
+    },
+    {
+      "slug": "anthropic",
+      "name": "Anthropic",
+      "group": "company",
+      "entityId": "anthropic",
+      "tags": [
+        "entity:anthropic"
+      ],
+      "definition": "仅追踪 Anthropic 的 Agent Evaluation 相关研究、评测协议、结果与工程实践。一般产品与公司新闻不因主体身份入选。",
+      "related": [
+        "methods",
+        "results"
+      ]
+    },
+    {
+      "slug": "google",
+      "name": "Google / DeepMind",
+      "group": "company",
+      "entityId": "google",
+      "tags": [
+        "entity:google"
+      ],
+      "definition": "仅追踪 Google / DeepMind 的 Agent Evaluation 相关研究、评测协议、结果与工程实践。一般产品与公司新闻不因主体身份入选。",
+      "related": [
+        "methods",
+        "results"
       ]
     }
   ]
