@@ -25,3 +25,12 @@
 - 本地 typecheck 仍因 `/proc/self/exe` 环境限制失败；最终 typecheck、PostgreSQL 测试、API/MCP smoke 与 Docker Compose 以分支 CI 为准。
 - 两处最小框架修复：API 分类默认值从旧 `tip` 改为配置首项；publication 移除旧 `tip/opinion` 合并特例。现有测试同步使用新分类；CI 按源配置检查种子数量，并验证 api/db/web/worker 都在运行。
 - 未新增数据库字段或迁移。未提交 `.env`、密钥、私有数据或模型回执。
+
+## v0.1 完整 CI 验收
+
+- [Check #2](https://github.com/junli0324/agent-eval-radar/actions/runs/37804592935) 对提交 `8af7a136a73954c2e9610a35fc56968eed671c7e` 验证通过，2026-10-09 核实最终状态为 Success。
+- `check` 成功（1m 17s）：typecheck、Web 构建与 Web 测试、PostgreSQL 迁移/Topic 种子、Web/API/RSS smoke、MCP 检查及现有后端测试。
+- `docker` 成功（52s）：镜像构建、Docker Compose 启动、smoke、12 个信源种子数量校验，以及 api/db/web/worker 四个服务运行检查。
+- 已核对 GitHub 开发分支与本地代码树完全一致；所有实现分阶段提交到 `feat/agent-eval-v0.1`。尚未合并 main、未部署生产站点。
+- 工程验收不等于真实模型效果验收：真实采集、模型评分/归组/摘要仍须在提供密钥和预算后，用人工 gold set 验证。下一步见 `calibration.md`。
+- 上线前由运营者确认域名、部署环境、模型与预算、联系方式，以及 `industry/pages/` 条款/隐私模板。
