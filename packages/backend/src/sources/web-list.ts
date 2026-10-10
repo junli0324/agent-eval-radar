@@ -232,6 +232,37 @@ function fromDocusaurusChangelog(html: string, base: string, source: SourceRow):
   return out;
 }
 
+/** Inspect's Atom lists tags without release notes. Its Quarto changelog holds one version per section. */
+export function fromInspectChangelog(html: string, base: string): Candidate[] {
+  const $ = cheerio.load(html);
+  const out: Candidate[] = [];
+  const seen = new Set<string>();
+  $("main section.level2").each((_i, node) => {
+    const section = $(node);
+    const heading = collapseWhitespace(section.children("h2").first().text());
+    const match = /^(v?\d+\.\d+\.\d+)\s*\((\d{1,2} [A-Za-z]+ \d{4})\)$/.exec(heading);
+    if (!match || seen.has(match[1]!)) return;
+    const [, version, day] = match;
+    const publishedAt = parseLooseDate(day, "+00:00");
+    if (!publishedAt) return;
+    // The site's date-based anchors move as new versions are prepended. Pin the original link and
+    // identity to the version's own changelog instead, so yesterday's article never becomes today's.
+    const url = `https://github.com/UKGovernmentBEIS/inspect_ai/blob/${version}/CHANGELOG.md`;
+    const content = section.clone();
+    content.children("h2").remove();
+    content.find("nav, .anchorjs-link").remove();
+    const bodyHtml = sanitizeBody(content.html() ?? "", base);
+    const bodyText = stripTags(bodyHtml);
+    if (!bodyText.trim()) return;
+    seen.add(version!);
+    out.push({ url, identityKey: `url:${url}`, title: `Inspect AI ${version} changelog`,
+      publishedAt, bodyHtml, bodyText, bodyStatus: "ok", language: "en",
+      raw: { officialChangelog: base, version, datePrecision: "day" } });
+  });
+  // Match the former Atom window; don't feed hundreds of historical releases to the worker.
+  return out.slice(0, 10);
+}
+
 async function fetchScript(url: string): Promise<string> {
   const res = await guardedFetch(url, { timeoutMs: 25_000 });
   if (res.status !== 200) throw new FetchError(`HTTP ${res.status} for ${url}`, res.status);
@@ -304,9 +335,10 @@ async function fromMimoHome(html: string, base: string, source: SourceRow): Prom
 
 export async function fetchWebList(source: SourceRow): Promise<Candidate[]> {
   const { text, viaJina, base } = await fetchListingText(source);
-  const mode = source.config.adapter === "mimo_home" ? "mimo_home" : source.config.parseMode ?? (viaJina ? "markdown" : "html");
+  const mode = source.config.adapter ?? source.config.parseMode ?? (viaJina ? "markdown" : "html");
   let out: Candidate[];
   if (mode === "mimo_home") out = await fromMimoHome(text, base, source);
+  else if (mode === "inspect_changelog") out = fromInspectChangelog(text, base);
   else if (mode === "markdown") out = fromMarkdown(text, base, source);
   else if (mode === "docusaurus_changelog") out = fromDocusaurusChangelog(text, base, source);
   else out = fromHtml(text, base, source);
