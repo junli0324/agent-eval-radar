@@ -75,11 +75,11 @@
     },
     {
       "id": "rss-inspect-ai",
-      "name": "Inspect AI · Releases",
-      "kind": "rss",
+      "name": "Inspect AI · Changelog",
+      "kind": "web_list",
       "config": {
-        "feedUrl": "https://github.com/UKGovernmentBEIS/inspect_ai/releases.atom",
-        "summaryIsBody": true,
+        "url": "https://inspect.aisi.org.uk/CHANGELOG.html",
+        "adapter": "inspect_changelog",
         "_aihot": {
           "initialBackfillLimit": 5
         }
