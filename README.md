@@ -8,7 +8,7 @@
 
 ## v0.1
 
-- 10 个 Agent 场景 Topic、15 个能力标签、12 个公开 RSS/Atom 信源。
+- 10 个 Agent 场景 Topic、15 个能力标签、12 个公开 RSS/Atom 或官方网页信源。
 - 领域预筛、独立双评分、中文摘要、结构化抽取、事件归组及日报/周报/月报。
 - 自有雷达图标与品牌；关闭通用模型榜和 Codex 重置监控。
 - 保留原阈值 T1 60 / T1_5 65 / T2 76，待人工 gold set 校准。
@@ -53,7 +53,7 @@ node --test apps/web/tests/*.test.ts
 node scripts/smoke.ts --base http://localhost:3000
 ```
 
-[验证记录](industry/v0.1/validation.md) · [信源取舍](industry/v0.1/sources.md) · [gold set 与校准](industry/v0.1/calibration.md) · [部署](docs/deploy.md) · [架构](docs/architecture.md)
+[验证记录](industry/v0.1/validation.md) · [信源取舍](industry/v0.1/sources.md) · [Windows 本地试用更新](industry/v0.1/local-trial-update.md) · [gold set 与校准](industry/v0.1/calibration.md) · [部署](docs/deploy.md) · [架构](docs/architecture.md)
 
 `industry/pages/` 的条款与隐私说明仍是待运营者确认的模板。真实模型效果未因工程测试通过而得到验证，示例 gold set 均为虚构格式示例。
 
