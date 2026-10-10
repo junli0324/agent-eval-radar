@@ -36,6 +36,7 @@
 ```
 
 - `parseMode`：`html`（默认，用选择器）、`markdown`（经 Jina 渲染后按 Markdown 读）、`docusaurus_changelog`。
+- `adapter: "inspect_changelog"`：Inspect 官方 Quarto Changelog 的版本章节；正文按版本分开，链接固定到对应 Git tag，最多取最近 10 版。不适用于普通网页列表。
 - `detail`：列表缺日期、标题或摘要时抓详情页补齐（`publishedAtSelector`、`titleSelector`、`summarySelector` 等）。
 - `allowUrlPrefixes` / `denyUrlPrefixes`：只收某些路径下的文章。
 
