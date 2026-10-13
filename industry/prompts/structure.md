@@ -12,6 +12,8 @@
 - 实体：{{entityTags}}
 没有适用的主题或实体时，只返回分类标签，不要凑标签。
 
+{{> rules-tag-evidence}}
+
 三、主体 subjects：资料实际讨论的主体公司或机构（不是顺带提及，也不是 GitHub/arXiv 托管平台），用这些 id：{{entities}}。没有就给空数组。
 
 四、事实 fact：这条资料报道的核心事实，用于把同一件事的多篇报道归到一起：title（≤30 字的事实标题），subject（主体），action（动作），object（对象），occurredAt（原文明确给出的发生日期 YYYY-MM-DD，未知为 null）。观点和盘点类资料可以给 null。subject 写作者/团队或明确主体；object 尽量保留 Benchmark/数据集名、版本或具体评测对象。action 区分发布、更新、评测、复现、修正或披露。不要新增字段；原文没有的版本、日期或指标不得补造。同一 Benchmark 上不同实验不是天然同一事实。
