@@ -38,3 +38,7 @@ node --env-file=.env scripts/eval-relations.ts --gold .data/relation-gold.jsonl 
 ```
 
 检查四类 precision/recall/F1、混淆矩阵，以及 SAME_OCCURRENCE 的错误合并率。此脚本只测 pairwise judge，不测候选召回全链路；还要人工抽查事件页、重复曝光和独立来源热度计数。不要同时修改 selection threshold 和 grouping confidence threshold 来掩盖错误。
+
+## 本地试用记录
+
+[2026-10-13 开发样本与分歧](local-calibration-2026-10-13.md) 记录真实运行观察、正文版本指纹和摘要/标签复测条件。这些已用于提示词调整的样本仅属于 development；边界裁定与历史判断修订均保留，不作为冻结 gold 或质量达标证明。
