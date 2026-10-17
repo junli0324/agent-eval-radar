@@ -1,5 +1,7 @@
 # Windows 本地试用：Inspect 信源修复
 
+已完成此修复、准备充实网站内容时，继续阅读 [批量试用资料库](trial-library.md)：30 篇候选，分批导入、分析与审核发布。
+
 适用于已在 `D:\Projects\agent-eval-radar` 跑通 Docker、并使用 `feat/agent-eval-v0.1` 分支的站点。这里只更新本地试用，不购买服务器或域名，不需要提供任何 Key。
 
 ## 更新代码与镜像
