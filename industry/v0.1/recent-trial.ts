@@ -10,9 +10,26 @@ import { candidates, composeDaily } from "@aihot/backend/reports/compose";
 import { stopBoss } from "@aihot/backend/jobs/queue";
 import { RECENT_SOURCES, RECENT_DAYS, assertRecent, dailyWindow, recentOptions, recentValves, damagedCopy } from "./recent-policy.ts";
 
+interface RecentMaterial {
+  revision: number;
+  backfill: boolean;
+  published_at: Date | null;
+  discovered_at: Date;
+}
+
+interface RecentRow extends RecentMaterial {
+  id: string; source_id: string; title: string; url: string;
+  body_status: string; body_chars: number | null;
+  analysis_id: number | null; input_revision: number | null;
+  relevance: string | null; selected: boolean | null; score: number | null;
+  category: string | null; tags: string[] | null;
+  title_zh: string | null; summary_zh: string | null; reason_zh: string | null;
+  public_visibility: string | null; public_selected: boolean | null; visible_after: Date | null;
+}
+
 export async function recentRows(now = new Date()) {
   const cutoff = new Date(now.getTime() - RECENT_DAYS * 86400000);
-  return sql`SELECT a.id, a.source_id, a.title, a.url, a.published_at, a.discovered_at,
+  return sql<RecentRow[]>`SELECT a.id, a.source_id, a.title, a.url, a.published_at, a.discovered_at,
       a.backfill, a.revision, a.body_status, length(a.body_text) AS body_chars,
       n.id AS analysis_id, n.input_revision, n.relevance, n.selected, n.score,
       n.category, n.tags, n.title_zh, n.summary_zh, n.reason_zh,
@@ -75,7 +92,7 @@ export async function publishRecent(ids: string[]) {
   return sql.begin(async tx => {
     const results = [];
     for (const id of ids) {
-      const [a] = await tx`SELECT revision, backfill, published_at, discovered_at FROM articles WHERE id = ${id} FOR UPDATE`;
+      const [a] = await tx<RecentMaterial[]>`SELECT revision, backfill, published_at, discovered_at FROM articles WHERE id = ${id} FOR UPDATE`;
       assertRecent(a!);
       const [n] = await tx`SELECT id FROM analyses WHERE article_id = ${id} ORDER BY input_revision DESC, id DESC LIMIT 1`;
       const reviewed = rows.find(a => a.id === id)!;
