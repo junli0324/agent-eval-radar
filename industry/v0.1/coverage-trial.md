@@ -58,6 +58,16 @@ docker compose exec -T -e COLLECT_ENABLED=true -e MODEL_CALLS_ENABLED=false api 
 
 ## 分析与审核
 
+本轮最后四条的审核已固化为 `coverage-final-review.json` 与 `publish-coverage-final.ts`，避免再次通过 PowerShell 管道传递中文代码。脚本核对当前材料版本与原分析文本/标签指纹，只修改已审核文案与分类标签；不改分数或精选状态。整批事务内发布，失败回滚，可重复运行：
+
+```powershell
+docker compose cp industry/v0.1/publish-coverage-final.ts api:/app/industry/v0.1/publish-coverage-final.ts
+docker compose cp industry/v0.1/coverage-final-review.json api:/app/industry/v0.1/coverage-final-review.json
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/publish-coverage-final.ts
+```
+
+这四条为 LangChain 轨迹评测、Agent 评测常见问题、评测综述和 GroundEval。原分析若已重新运行并发生变化，脚本停止，需重新人工审核；不强制覆盖已有不同人工编辑。
+
 网页正文比论文摘要长，token 消耗可能增加。先分析最多 5 篇（会产生模型费用），查看摘要与提供商账单后继续：
 
 ```powershell
