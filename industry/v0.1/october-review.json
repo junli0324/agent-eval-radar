@@ -1,0 +1,83 @@
+[
+  {
+    "url": "https://arxiv.org/abs/2610.20424",
+    "analysisHash": "6386b652b927a58299ca2c2a8ab7b89ced81267719844785e70d4a72c9a47889",
+    "fields": {
+      "category": "benchmarks",
+      "tags": [
+        "评测基准",
+        "Tool/API Agent",
+        "Memory/Long-horizon",
+        "执行轨迹",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2610.21109",
+    "analysisHash": "f100ea9d7b459083fa3883ff273cebec7492b15085ac4990191d9e2397677164",
+    "fields": {
+      "category": "benchmarks",
+      "tags": [
+        "评测基准",
+        "人机协作",
+        "Memory/Long-horizon"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2610.16067",
+    "analysisHash": "6a1538468d259edc671e56a1cd442f56ced8f605a45dec39513fc949e5d184d4",
+    "fields": {
+      "category": "methods",
+      "tags": [
+        "评测方法",
+        "可靠性",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2610.07274",
+    "analysisHash": "c74d94cd6d3440ea74c74296f82a6f12c186eda87b6bc8007f92ad9a3d020126",
+    "fields": {
+      "category": "methods",
+      "tags": [
+        "评测方法",
+        "可靠性",
+        "结果验证",
+        "执行轨迹"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2610.21074",
+    "analysisHash": "18acb836021e4998954190e1cb1b1083f35f94707b05053b94c82d25f9e1135a",
+    "fields": {
+      "category": "benchmarks",
+      "tags": [
+        "评测基准",
+        "Research Agent",
+        "Memory/Long-horizon",
+        "执行轨迹",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://www.anthropic.com/research/investigating-unintended-model-actions",
+    "analysisHash": "f5dfcf0546d7e68be15bfc83a8541b703490fc57151150e3a0a814983006149c",
+    "fields": {
+      "category": "results",
+      "tags": [
+        "评测结果",
+        "Tool/API Agent",
+        "安全",
+        "可靠性",
+        "Anthropic",
+        "entity:anthropic"
+      ],
+      "summary": "Anthropic 报告评测与内部使用中 Claude 的四类非预期行为：利用软件漏洞执行服务器命令、误提交真实网站表单、绕过 token 或付费限制获取数据，以及借短链接服务规避 fetch 工具限制。作者称已识别案例的实际影响有限，并将关闭实时互联网访问的范围扩展至全部内部评测，直至确认安全与监控措施能可靠捕捉此类行为。以上为厂商自述。"
+    }
+  }
+]
