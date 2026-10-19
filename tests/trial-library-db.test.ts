@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { after, test } from "node:test";
 import { sql, closeDb } from "@aihot/backend/db";
 import { stopBoss } from "@aihot/backend/jobs/queue";
-import { SOURCE_ID, importAbstract, publishReviewed, trialRows } from "../industry/v0.1/trial-library.ts";
+import { SOURCE_ID, importAbstract, importCoveragePage, publishReviewed, trialRows, trialOverview } from "../industry/v0.1/trial-library.ts";
+import { coverageCatalog, candidateSourceId } from "../industry/v0.1/coverage-materials.ts";
 
 after(async () => { await stopBoss(); await closeDb(); });
 
@@ -40,5 +41,40 @@ test("trial import resumes without duplicates or paid calls; publication require
     assert.equal(afterCalls!.count, before!.count);
   } finally {
     await sql`DELETE FROM articles WHERE id = ${first.articleId}`;
+  }
+});
+
+test("coverage sources stay unscheduled; snapshots deduplicate and status includes effective public fields", async () => {
+  const c = coverageCatalog.find(c => c.id === "inspect-cyber-docs")!;
+  const html = `<html><body><main><h1>${c.name}</h1><p>${"Agent evaluations execute in a sandbox with explicit tasks, tools, and outcome verification. ".repeat(10)}</p></main></body></html>`;
+  const first = await importCoveragePage(c, html, c.url!);
+  try {
+    const second = await importCoveragePage(c, html, c.url!);
+    assert.equal(second.articleId, first.articleId);
+    assert.equal(second.revised, false);
+    const [source] = await sql`SELECT enabled, site_fulltext FROM sources WHERE id = ${candidateSourceId(c)}`;
+    assert.equal(source!.enabled, false);
+    assert.equal(source!.site_fulltext, false);
+    assert.equal((await trialRows("base")).some(r => r.id === first.articleId), false);
+    const a = (await trialRows("coverage")).find(r => r.id === first.articleId)!;
+    assert.equal(a.published_at, null);
+    assert.equal(a.material_scope, "documentation-snapshot");
+    await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected)
+      VALUES (${first.articleId}, ${a.revision}, 'rule', 'pass', 'tools', '模型标题', '工具文档摘要', 22, false)`;
+    await sql`INSERT INTO editorial_overrides (article_id, fields, reason) VALUES (${first.articleId}, '{"title":"人工修正标题","tags":["工具框架","安全"]}'::jsonb, 'trial test')`;
+    await publishReviewed([first.articleId]);
+    const p = (await trialRows("coverage")).find(r => r.id === first.articleId)!;
+    assert.equal(p.title_zh, "模型标题");
+    assert.equal(p.public_title, "人工修正标题");
+    assert.deepEqual(p.public_tags, ["工具框架", "安全"]);
+    const overview = await trialOverview("coverage");
+    assert.equal(overview.categories.tools, 1);
+    await sql`UPDATE sources SET site_fulltext = true WHERE id = ${candidateSourceId(c)}`;
+    await assert.rejects(importCoveragePage(c, html, c.url!), /settings differ/);
+    const [unchanged] = await sql`SELECT site_fulltext FROM sources WHERE id = ${candidateSourceId(c)}`;
+    assert.equal(unchanged!.site_fulltext, true, "do not overwrite manual source settings");
+  } finally {
+    await sql`DELETE FROM articles WHERE id = ${first.articleId}`;
+    await sql`UPDATE sources SET site_fulltext = false WHERE id = ${candidateSourceId(c)}`;
   }
 });
