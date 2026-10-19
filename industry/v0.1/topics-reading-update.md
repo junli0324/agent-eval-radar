@@ -1,6 +1,6 @@
 # 第一步：主题目录与六篇十月资料发布
 
-本轮先完善阅读入口。主题目录从 `industry/topics.json` 的分组读取 Agent 场景、情报分类、研究机构，文案在 `industry/topic-page.ts`；已有精选和待补充主题明确区分。空主题页提供其他主题与全部内容入口。原页面把上游三组标题写死，无法仅通过行业包改变，因此仅对 `apps/web/app/routes/topics.tsx`、`topic.tsx` 做小范围配置接线，不重构应用。
+本轮先完善阅读入口。主题目录从 `industry/topics.json` 的分组读取 Agent 场景、情报分类、研究机构，文案在 `industry/topic-page.ts`；已有精选和待补充主题明确区分。空主题页提供其他主题与全部内容入口。原页面把上游三组标题写死，无法仅通过行业包改变，因此对 `apps/web/app/routes/topics.tsx`、`topic.tsx` 做小范围配置接线。Web 类型检查的 module 改为 ESNext 以支持 JSON import attributes；仍然不输出代码，运行时构建继续由原有 Vite 负责。不重构应用。
 
 六篇已分析的十月材料沿用同一审核发布器，新增 `--review=october` 选择本次计划；原命令保持兼容。修正范围是标签与摘要：评分器缺陷不标为评测污染；Kolab 的协作任务不直接标为 Generalist Agent；BizBench 不把对比模型厂商当核心主体；Anthropic 报告保留原评测结果分类并对齐首标签，限定厂商自述，去掉不确定的工具长度限制解释。原评分和精选判定不变，不重新调用模型。
 
