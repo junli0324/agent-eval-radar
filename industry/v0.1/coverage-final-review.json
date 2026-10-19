@@ -53,5 +53,22 @@
         "可靠性"
       ]
     }
+  },
+  {
+    "url": "https://arxiv.org/abs/2607.07946",
+    "analysisHash": "7dfced394a75da48f57852d62e221eda2dfd6989b2daaac69a6cceba26f751c0",
+    "fields": {
+      "category": "benchmarks",
+      "title": "DeepSWE：113 项原创长程编码任务与可执行验证器",
+      "summary": "作者报告 DeepSWE 含 113 项原创长程软件工程任务，覆盖 91 个开源仓库和五种语言。任务不回流上游，以降低参考解进入训练数据的风险；手写 verifier 检查所需功能并接受不同的可行实现。论文还用 LLM 裁判交叉复核评分；裁判与验证器的分歧率不等同于真实错误率。",
+      "reason": "该基准提供原创任务、可执行验证器和交叉复核设置，可用于比较编码 Agent 的评分口径与数据泄漏控制方式。",
+      "tags": [
+        "评测基准",
+        "Code Agent",
+        "Memory/Long-horizon",
+        "评测污染",
+        "结果验证"
+      ]
+    }
   }
 ]

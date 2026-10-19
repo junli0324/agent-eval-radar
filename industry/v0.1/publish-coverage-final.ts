@@ -1,4 +1,4 @@
-// Apply the four reviewed corrections from UTF-8 files. Never force selected or call a model.
+// Apply the final coverage reviews and the held DeepSWE correction from UTF-8 files.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { sql, closeDb } from "@aihot/backend/db";
@@ -22,7 +22,7 @@ export async function publishCoverageFinal() {
     const results = [];
     for (const spec of finalReviews) {
       const [a] = await tx`SELECT id, revision FROM articles WHERE url = ${spec.url}
-        AND raw->>'trialCollection' = 'agent-eval-trial-2026-10' AND raw->>'trialSet' = 'coverage' FOR UPDATE`;
+        AND raw->>'trialCollection' = 'agent-eval-trial-2026-10' FOR UPDATE`;
       if (!a) throw new Error(`Reviewed article not found: ${spec.url}`);
       const [analysis] = await tx`SELECT input_revision, relevance, title_zh, summary_zh, tags FROM analyses
         WHERE article_id = ${a.id} ORDER BY input_revision DESC, id DESC LIMIT 1`;
@@ -34,7 +34,7 @@ export async function publishCoverageFinal() {
       }
       const fields = { ...(o?.fields ?? {}), ...spec.fields };
       if (!o || stableJson(fields) !== stableJson(o.fields)) {
-        const reason = "人工审核补充集最后四条：统一分类标签、明确文档与证据范围，保留原评分和精选判定。";
+        const reason = "人工审核补充集最后四条及此前暂缓的 DeepSWE：统一分类标签、明确证据范围，保留原评分和精选判定。";
         await tx`INSERT INTO editorial_overrides (article_id, fields, reason, updated_by)
           VALUES (${a.id}, ${tx.json(fields as never)}, ${reason}, 'local-trial-final-review')
           ON CONFLICT (article_id) DO UPDATE SET fields = EXCLUDED.fields, reason = EXCLUDED.reason,
