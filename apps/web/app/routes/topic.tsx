@@ -85,7 +85,9 @@ export default function TopicPage() {
       </div>
       {items.length === 0 ? (
         <div className="lg:card">
-          <EmptyState title="这个主题暂时还没有精选内容" />
+          <EmptyState title="这个主题暂时还没有精选内容" action={<div className="flex gap-2"><Link to="/topics" className="chip">浏览其他评测主题</Link><Link to="/all" className="chip">查看全部内容</Link></div>}>
+            可以返回主题目录查看已有精选，或到全部内容中阅读其他相关资料。
+          </EmptyState>
         </div>
       ) : (
         <DayList items={items} />
