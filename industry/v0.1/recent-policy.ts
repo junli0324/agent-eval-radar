@@ -1,7 +1,7 @@
 import { addDays, beijingDate, isValidDate } from "@aihot/contracts/time";
 
 // Deliberately excludes broad feeds and the currently rate-limited arXiv endpoint.
-export const RECENT_SOURCES = ["rss-inspect-ai", "rss-tau2-bench", "rss-deepeval", "rss-langfuse"];
+export const RECENT_SOURCES = ["rss-inspect-ai", "rss-tau2-bench", "rss-deepeval", "rss-langfuse", "web-langchain-blog", "web-anthropic-research"];
 export const RECENT_DAYS = 14;
 export const damagedCopy = (v: unknown): boolean => typeof v === "string"
   ? /\?{2,}|\uFFFD/.test(v) : Array.isArray(v) && v.some(damagedCopy);

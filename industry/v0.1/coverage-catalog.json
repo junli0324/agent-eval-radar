@@ -12,5 +12,11 @@
   {"id":"trajectory-evals","name":"How to evaluate your agent with trajectory evaluations","url":"https://docs.langchain.com/langsmith/trajectory-evals","source":"langchain","kind":"docs","focus":"轨迹匹配、工具调用与 LLM-as-Judge 方法","expectedCategory":"methods"},
   {"id":"agent-evals-questions","name":"The Most Common Questions About Agent Evals, Answered","url":"https://www.langchain.com/blog/common-questions-about-agent-evals","source":"langchain","kind":"article","focus":"Agent 评测起步、评测层级与实践问题","expectedCategory":"practice"},
   {"id":"2507.21504","name":"Evaluation and Benchmarking of LLM Agents: A Survey","focus":"评测目标与评测过程的双维分类及企业落地缺口","expectedCategory":"paper"},
-  {"id":"2606.22737","name":"GroundEval: A Deterministic Replacement for LLM-as-Judge in Stateful Agent Evaluation","focus":"以检索、引用、时间与访问权限证据检查 Agent 行为","expectedCategory":"methods"}
+  {"id":"2606.22737","name":"GroundEval: A Deterministic Replacement for LLM-as-Judge in Stateful Agent Evaluation","focus":"以检索、引用、时间与访问权限证据检查 Agent 行为","expectedCategory":"methods"},
+  {"id":"2610.20424","name":"BizBench: Unveiling Hidden Challenges in Deploying Long-Horizon Agents for Real-World Business","focus":"长期业务任务的目标完成与执行约束双重验证","expectedCategory":"benchmarks"},
+  {"id":"2610.21109","name":"Kolab: Benchmarking Human-Agent Collaboration in Long-Horizon Workflows","focus":"真实专业工作流中的人机协作、贡献采纳与质量判断","expectedCategory":"benchmarks"},
+  {"id":"2610.16067","name":"When Agent Evaluation Becomes Unreliable: An Empirical Study of Oracle Failures and Configuration-Dependent Measurement in an LLM Agent Benchmark","focus":"评分器完整性审计、已知答案对照与配置依赖的测量偏差","expectedCategory":"paper"},
+  {"id":"2610.07274","name":"A Trust Layer for Agent Evaluation","focus":"对既有成绩追加轨迹证据、虚假完成声明和重复运行稳定性审计","expectedCategory":"methods"},
+  {"id":"2610.21074","name":"OmicsBench: a long-horizon multi-turn benchmark of AI agents on research-study-scale bioinformatics","focus":"多轮依赖任务、确定性评分与 Agent 失败模式发现","expectedCategory":"benchmarks"},
+  {"id":"unintended-actions","name":"Investigating unintended model actions in our evaluations and internal use","url":"https://www.anthropic.com/research/investigating-unintended-model-actions","source":"anthropic","kind":"article","focus":"真实评测中的越权行动、轨迹审计与环境隔离实践","expectedCategory":"practice"}
 ]
