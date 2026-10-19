@@ -1,5 +1,21 @@
 # 本地内容扩充：补齐分类覆盖
 
+## Windows 中文人工修正的编码修复
+
+Windows PowerShell 的文本管道可能把中文编码为 `?`。不要再通过 `@' ... '@ | docker ... node` 传递含中文的修正脚本。模型回执与原始分析通常不受影响；受损的是这次人工覆盖字段。仅修改终端显示编码不能恢复已经存进数据库的问号。
+
+本仓库的 `repair-review-encoding.ts` 从 UTF-8 文件读取已审核的 12 条修正规格（本轮 10 条，加 GAIA 与 AgentDojo），仅恢复可识别的损坏字段；保留干净的人工修改、评分、精选、原始材料、分析和回执。整批在同一事务内重建 publication 并校验文字，失败会回滚；重复运行不会重复修改。其他编辑者的受损记录停止等待人工处理，不盲目覆盖。审核日志保留修复前后的值。
+
+更新代码后，不必重建镜像即可将 UTF-8 文件复制进现有 API 容器：
+
+```powershell
+docker compose cp industry/v0.1/repair-review-encoding.ts api:/app/industry/v0.1/repair-review-encoding.ts
+docker compose cp industry/v0.1/local-review-20261019.json api:/app/industry/v0.1/local-review-20261019.json
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/repair-review-encoding.ts
+```
+
+`modelCalls: 0`、各条 `publicTextOk: true` 为正常结果。刷新页面确认；后续常规构建镜像也会包含这两个文件。日常修正优先使用后台编辑器，或运行已保存为 UTF-8 的仓库脚本。不要重跑旧中文管道命令。
+
 已导入的 20 篇大多是 Benchmark，不能代表整个 Agent Evaluation 内容面。这轮新增独立的 `coverage` 候选集，共 14 条，优先覆盖评测方法、论文研究、工具框架、评测结果、实践观点。`expectedCategory` 只是人工选题意图，不会覆盖模型分类、评分或精选判定；以实际材料的核心贡献验收。
 
 ## 内容目录
