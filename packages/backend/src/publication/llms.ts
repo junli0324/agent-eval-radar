@@ -5,13 +5,14 @@ import { CATEGORY_KEYS } from "@aihot/contracts/taxonomy";
 import { siteUrl } from "./links.ts";
 import { sql } from "../db.ts";
 import { MCP_TOOLS } from "@aihot/contracts/mcp";
+import { reportContentSql } from "./report-content.ts";
 
 /** Discovery only needs to know whether an entry exists, not count its entire history. */
 export async function loadLlmsAvailability() {
   const [row] = await sql<{ hasDailies: boolean; hasWeekly: boolean; hasMonthly: boolean; hasLeaderboard: boolean }[]>`
-    SELECT EXISTS (SELECT 1 FROM reports WHERE kind = 'daily') AS "hasDailies",
-           EXISTS (SELECT 1 FROM reports WHERE kind = 'weekly') AS "hasWeekly",
-           EXISTS (SELECT 1 FROM reports WHERE kind = 'monthly') AS "hasMonthly",
+    SELECT EXISTS (SELECT 1 FROM reports WHERE kind = 'daily' AND ${reportContentSql()}) AS "hasDailies",
+           EXISTS (SELECT 1 FROM reports WHERE kind = 'weekly' AND ${reportContentSql()}) AS "hasWeekly",
+           EXISTS (SELECT 1 FROM reports WHERE kind = 'monthly' AND ${reportContentSql()}) AS "hasMonthly",
            EXISTS (SELECT 1 FROM lb_runs WHERE status = 'published') AS "hasLeaderboard"`;
   return row!;
 }
