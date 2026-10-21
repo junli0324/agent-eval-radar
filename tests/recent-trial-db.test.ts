@@ -58,7 +58,7 @@ test("empty/existing daily editions are skipped without model calls or new revis
     assert.equal((await generateRecentDaily(date)).status, "no-eligible-content");
     assert.equal((await sql`SELECT key FROM reports WHERE kind = 'daily' AND key = ${date}`).length, 0);
     await sql`INSERT INTO reports (kind, key, window_start, window_end, content, generated_at)
-      VALUES ('daily', ${date}, '2001-02-02T00:00:00Z', '2001-02-03T00:00:00Z', '{"sections":[]}', now())`;
+      VALUES ('daily', ${date}, '2001-02-02T00:00:00Z', '2001-02-03T00:00:00Z', '{"overview":"Existing report text","sections":[]}', now())`;
     assert.equal((await generateRecentDaily(date)).status, "already-present");
     const [report] = await sql`SELECT revision FROM reports WHERE kind = 'daily' AND key = ${date}`;
     assert.equal(report!.revision, 1);
