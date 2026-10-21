@@ -24,6 +24,19 @@ test("official blog selectors read dated article cards and the title filter reje
   assert.equal(papers.length, 1);
   assert.equal(papers[0]!.publishedAt!.toISOString(), "2026-10-09T00:00:00.000Z");
   assert.equal(noiseFiltered(papers[0]!, anthropic), false);
+  // The new listing puts a team link and thumbnail before the actual title link.
+  // Match dated article rows, not hero tiles/navigation; duplicate layout cards keep one identity.
+  const card = `<article data-listing-row="article-11ebf016"><header><p><a href="/research/team/alignment">Alignment</a></p><time>Oct 9, 2026</time></header>
+    <figure><a href="/research/wrong-thumbnail">Image</a></figure><div><h3><a href="/research/investigating-unintended-model-actions">Investigating unintended model actions in our evaluations and internal use</a></h3><p>This report describes observed behavior.</p></div></article>`;
+  const newListing = `<nav><a href="/research/team/alignment">Alignment</a></nav>${card}${card}
+    <article data-listing-row="article-generic"><time>Oct 16, 2026</time><h3><a href="/research/employment">How employment is changing</a></h3></article>`;
+  const dated = fromHtml(newListing, anthropic.config.url, anthropic);
+  assert.equal(dated.length, 2);
+  const relevant = dated.filter(c => !noiseFiltered(c, anthropic));
+  assert.equal(relevant.length, 1);
+  assert.equal(relevant[0]!.url, "https://www.anthropic.com/research/investigating-unintended-model-actions");
+  assert.equal(relevant[0]!.title, "Investigating unintended model actions in our evaluations and internal use");
+  assert.equal(relevant[0]!.publishedAt!.toISOString(), "2026-10-09T00:00:00.000Z");
   for (const source of BLOG_SOURCES) assert.deepEqual(unsupportedConfig(source.kind, source.config), []);
   assert.equal(recentOptions(["collect", "--sources=web-langchain-blog,web-anthropic-research"]).sources.length, 2);
 });
