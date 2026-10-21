@@ -7,6 +7,7 @@ import { extractArticleBody } from "@aihot/backend/content/extract";
 import { analyzeArticle } from "@aihot/backend/editorial/analyze";
 import { publishArticleTx } from "@aihot/backend/publication/publish";
 import { candidates, composeDaily } from "@aihot/backend/reports/compose";
+import { reportContentSql } from "@aihot/backend/publication/report-content";
 import { stopBoss } from "@aihot/backend/jobs/queue";
 import { RECENT_SOURCES, RECENT_DAYS, assertRecent, dailyWindow, recentOptions, recentValves, damagedCopy } from "./recent-policy.ts";
 
@@ -66,7 +67,7 @@ export async function dailyPreview(date?: string, now = new Date()) {
     if (item.factId) covered.add(item.factId);
   }
   const fresh = all.filter(a => !covered.has(a.factKey) && !covered.has(`a:${a.itemId}`));
-  const [existing] = await sql`SELECT key, revision, generated_at FROM reports WHERE kind = 'daily' AND key = ${window.key}`;
+  const [existing] = await sql`SELECT key, revision, generated_at FROM reports WHERE kind = 'daily' AND key = ${window.key} AND ${reportContentSql()}`;
   return { ...window, existing: existing ?? null, candidates: all.length, repeatsSuppressed: all.length - fresh.length,
     fresh: fresh.length, articles: fresh.map(a => ({ id: a.itemId, title: a.title, source: a.sourceName, score: a.score })),
     note: "Preview excludes backfill and the preceding seven editions; the existing composer also applies section size limits. No report written or model called." };
