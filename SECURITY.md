@@ -1,13 +1,17 @@
 # 安全问题报告
 
-如果你发现权限绕过、密钥泄露、注入或其他可能影响部署安全的问题，请通过 [GitHub 私密漏洞报告](https://github.com/KKKKhazix/AIHOT/security/advisories/new) 联系维护者。
+如果发现权限绕过、密钥泄露、注入或其他可能影响部署安全的问题，请通过 **[AgentEval Radar 的 GitHub 私密漏洞报告](https://github.com/junli0324/agent-eval-radar/security/advisories/new)** 联系本仓库维护者。
 
 请提供：
 
-- 受影响的提交版本、部署方式和必要环境信息；
+- 受影响的分支、提交号、部署方式和必要环境信息；
 - 在你有权测试的环境中复现问题的最少步骤；
 - 可能造成的影响，以及已移除敏感信息的日志或截图。
 
-不要在公开 Issue、讨论区或 PR 中提前披露可利用的漏洞细节，也不要上传真实密钥、密码、Cookie、用户数据或完整数据库。普通使用问题和非安全 Bug 请使用 [讨论区](https://github.com/KKKKhazix/AIHOT/discussions/categories/q-a) 或 [Issue](https://github.com/KKKKhazix/AIHOT/issues/new/choose)。
+不要在公开 Issue 或 PR 中披露可利用的漏洞细节，也不要上传真实密钥、密码、Cookie、用户数据或完整数据库。如果私密报告入口暂时不可用，请仅在普通 Issue 中请求开启私密联系渠道，不附漏洞细节或秘密。
 
-目前优先在公开仓库最新的 `main` 上验证和修复安全问题，没有单独维护的长期支持分支。维护者会确认影响范围、准备修复，并在适当时机发布说明；暂不承诺固定响应时间。
+普通安装使用、内容误筛和非安全 Bug 请使用[本仓库 Issue 表单](https://github.com/junli0324/agent-eval-radar/issues/new/choose)。本项目独立维护，安全报告不会自动转交 AIHOT 上游。
+
+当前 v0.1 的功能代码在 `feat/agent-eval-v0.1`，`main` 暂仅同步项目与反馈说明。请注明实际使用的提交；合入后以最新 `main` 为维护基线，暂没有单独维护的长期支持分支。
+
+维护者会核实影响范围并准备修复，不承诺固定响应时间。若你自己的凭据已经泄露，应立即通过对应提供商撤销或轮换，不要等仓库修复后再处理。
