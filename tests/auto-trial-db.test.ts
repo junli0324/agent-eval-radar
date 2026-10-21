@@ -1,6 +1,8 @@
 import './setup.ts';
 import assert from 'node:assert/strict';
 import { after, test } from 'node:test';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { sql, closeDb } from '@aihot/backend/db';
 import { queueProcessing } from '@aihot/backend/jobs/content';
 import { stopBoss } from '@aihot/backend/jobs/queue';
@@ -75,6 +77,10 @@ test('bounded automation preserves history and queued work, expires, shares the 
     assert.equal((await stopTrial()).budgetRestored, true);
     assert.deepEqual((await sql`SELECT per_minute, per_hour, per_day FROM budgets WHERE service = 'llm'`)[0], beforeBudget);
     assert.equal((await stopTrial()).status, 'already-stopped');
+    const exited = await promisify(execFile)(process.execPath, ['industry/v0.1/auto-trial-worker.ts'], {
+      timeout: 15000, env: { ...process.env, AGENT_EVAL_AUTO_TRIAL: 'true', COLLECT_ENABLED: 'true', MODEL_CALLS_ENABLED: 'true', EMBEDDINGS_ENABLED: 'false' },
+    });
+    assert.match(exited.stdout, /trial-ended/, 'the actual worker entry exits normally without a live trial or paid work');
     await prepareTrial();
     await sql`UPDATE budgets SET per_day = per_day - 1 WHERE service = 'llm'`;
     await assert.rejects(runTrialTick({ operations }), /budget changed/);
