@@ -7,6 +7,7 @@ import { sql, closeDb } from '@aihot/backend/db';
 import { queueProcessing } from '@aihot/backend/jobs/content';
 import { stopBoss } from '@aihot/backend/jobs/queue';
 import { upsertMaterial } from '@aihot/backend/content/materials';
+import { publishArticle } from '@aihot/backend/publication/publish';
 import { CAPABILITIES, invalidateModelCache } from '@aihot/backend/editorial/models';
 import { BudgetExceededError } from '@aihot/backend/providers/receipts';
 import { prepareTrial, stopTrial, runTrialTick, TRIAL_KEY, TRIAL_LOCK, trialStatus, trialActive } from '../industry/v0.1/auto-trial.ts';
@@ -23,6 +24,7 @@ test('bounded automation preserves history and queued work, expires, shares the 
   const [beforeCalls] = await sql`SELECT count(*) AS n FROM receipt_attempts`;
   const source = 'web-langchain-blog'; const other = `outside-trial-${Date.now()}`;
   const ids: string[] = [];
+  const settled: string[] = [];
   try {
     await sql`INSERT INTO sources (id, name, kind, tier, next_fetch_at) VALUES
       (${source}, 'Trial fixture', 'web_list', 'T1_5', '2099-01-01'), (${other}, 'Outside fixture', 'rss', 'T1_5', now())`;
@@ -55,6 +57,16 @@ test('bounded automation preserves history and queued work, expires, shares the 
     const [historyJob] = await sql`SELECT id, state FROM pgboss.job WHERE data->>'articleId' = ${ids[1]!} LIMIT 1`;
     assert.ok(historyJob);
     const grouped: string[] = []; const extracted: string[] = [];
+    // Thirty newer, completed items must not keep an older pending item below every tick's limit.
+    for (let i = 0; i < 30; i++) {
+      const { articleId } = await upsertMaterial({ sourceId: source, title: 'Settled agent evaluation', url: `https://example.org/${other}/settled/${i}`,
+        publishedAt: new Date(Date.now() - 600000), via: 'import', bodyText: 'Original evidence', bodyStatus: 'ok' });
+      settled.push(articleId);
+      await sql`INSERT INTO analyses (article_id, input_revision, origin, relevance, category, title_zh, summary_zh, score, selected)
+        VALUES (${articleId}, 1, 'rule', 'pass', 'methods', '已有评测方法', '已有摘要。', 22, false)`;
+      await publishArticle(articleId);
+      await sql`UPDATE articles SET grouped_at = now() WHERE id = ${articleId}`;
+    }
     const operations = {
       collect: async () => { throw new Error('No source is due'); },
       extract: async (id: string) => { extracted.push(id); throw new Error('Body unavailable'); },
@@ -89,6 +101,7 @@ test('bounded automation preserves history and queued work, expires, shares the 
     await sql`UPDATE budgets SET per_minute = ${beforeBudget!.per_minute}, per_hour = ${beforeBudget!.per_hour}, per_day = ${beforeBudget!.per_day} WHERE service = 'llm'`;
     await sql`DELETE FROM settings WHERE key IN (${TRIAL_KEY}, ${TRIAL_KEY + '.last-tick'})`;
     if (ids.length) { await sql`DELETE FROM pgboss.job WHERE data->>'articleId' IN ${sql(ids)}`; await sql`DELETE FROM articles WHERE id IN ${sql(ids)}`; }
+    if (settled.length) { await sql`DELETE FROM pgboss.job WHERE data->>'articleId' IN ${sql(settled)}`; await sql`DELETE FROM articles WHERE id IN ${sql(settled)}`; }
     await sql`DELETE FROM sources WHERE id IN (${source}, ${other}, 'rss-tau2-bench')`;
   }
 });
