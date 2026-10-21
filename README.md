@@ -1,186 +1,267 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/banner-dark.png">
-    <img src="docs/assets/banner-light.png" alt="AIHOT：每个行业，都可以有自己的 AIHOT。很多条信源流进中间的精选，再分给法律、人力资源、金融等各个行业" width="100%">
-  </picture>
+  <img src="https://raw.githubusercontent.com/junli0324/agent-eval-radar/feat/agent-eval-v0.1/industry/brand/readme-banner.svg" alt="AgentEval Radar：看懂 Agent 能力，先看评测证据。追踪 Benchmark、评测方法、论文、工具、结果与实践。" width="100%">
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-176b75?style=flat-square" alt="MIT License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-176b75?style=flat-square" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/Language-中文为主-176b75?style=flat-square" alt="中文为主">
   <img src="https://img.shields.io/badge/Node.js-24-176b75?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js 24">
   <img src="https://img.shields.io/badge/PostgreSQL-17-176b75?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 17">
   <img src="https://img.shields.io/badge/Docker-Compose-176b75?style=flat-square&logo=docker&logoColor=white" alt="Docker Compose">
-  <a href="https://aihot.news"><img src="https://img.shields.io/badge/demo-aihot.news-202a30?style=flat-square" alt="aihot.news"></a>
+  <a href="https://github.com/junli0324/agent-eval-radar/actions/workflows/check.yml?query=branch%3Afeat%2Fagent-eval-v0.1"><img src="https://github.com/junli0324/agent-eval-radar/actions/workflows/check.yml/badge.svg?branch=feat%2Fagent-eval-v0.1" alt="开发分支工程检查"></a>
 </p>
 
 <p align="center">
-  <b>一个自己找热点、自己写日报的网站框架。</b><br>
-  把信源换成你的，把精选标准换成你的 KnowHow，它就是你的行业热点站。
+  <b>看懂 Agent 能力，先看评测证据。</b><br>
+  为中文 AI 产品经理、评测人员和开发者，持续整理 Agent Evaluation 的方法、进展与边界。
 </p>
 
 <p align="center">
-  <a href="#跑起来">跑起来</a> ·
-  <a href="docs/customize.md">改成你的行业</a> ·
-  <a href="#它是怎么工作的">它是怎么工作的</a> ·
-  <a href="#文档">文档</a> ·
-  <a href="https://github.com/KKKKhazix/AIHOT/discussions">社区交流</a>
+  <a href="#这是什么">项目介绍</a> ·
+  <a href="#关注什么">内容范围</a> ·
+  <a href="#本地跑起来">本地试用</a> ·
+  <a href="#开启受限自动运行">自动运行</a> ·
+  <a href="#文档导航">文档导航</a>
 </p>
 
-<br>
+> **当前阶段：v0.1 本地试用与筛选校准。** 功能代码在 [`feat/agent-eval-v0.1`](https://github.com/junli0324/agent-eval-radar/tree/feat/agent-eval-v0.1)，请按下文切换分支。`main` 目前仅同步项目介绍，尚未合并 v0.1 功能；暂无公开在线演示站。
 
 ## 这是什么
 
-[AIHOT](https://aihot.news) 是我做的一个 AI 热点网站。它每天从一批信源里收资料，用大模型先筛一遍、再独立打两次分，挑出真正值得看的，写成中文标题和摘要；把不同来源说的同一件事聚成一个事件，按有多少人在说排出热点；每天早上出一份日报。
+AgentEval Radar 是一个面向 **Agent Evaluation** 的中文前沿情报站。它从一手信源收集资料，判断相关性与专业价值，生成中文标题和摘要，将相关报道归为事件，再整理成可检索的阅读库、热点榜与定期报告。
 
-这个仓库是它的完整框架：网站、后台、精选流程、聚簇和热度算法，**所有提示词的原文和入选门槛**，都在这里。
+它关心几个具体问题：**Agent 到底能完成什么任务？怎样判断成功？分数在什么条件下成立？哪些失败值得复现和修复？**
 
-## 为什么开源
+这里的核心对象是 **Agent 的能力与行为评测**：编码、浏览器操作、Computer Use、工具调用、客服、研究、协作与长时程任务。Agent-as-a-Judge、LLM-as-Judge 也在范围内，前提是它们确实帮助评估 Agent。基础模型成绩、产品发布或融资新闻，需要有明确的 Agent 评测贡献才值得收录。
 
-这半年，很多做法律、做 HR、做金融、做贵金属的朋友问我，能不能也给他们的行业做一个。
+你可以用它选择 Benchmark、追踪评分协议变化、寻找评测工具，也可以沿着原文链接继续阅读。中文摘要保留 Benchmark、论文、模型和指标专名，例如 SWE-bench、OSWorld、τ-bench、Pass@k。
 
-我做不了。我不懂你们的行业，不知道哪些信源有用，也不知道什么样的消息，对你们来说才叫热点。
+## 关注什么
 
-但你们懂。
+### 六类内容
 
-既然我没办法满足所有人，那就把火种交到大家自己手上。
+| 分类 | 重点看什么 | 典型问题 |
+| --- | --- | --- |
+| **评测基准** | Benchmark、任务集、环境与实质版本更新 | 测哪些真实任务？成功条件是什么？ |
+| **评测方法** | 指标、评分器、轨迹分析、裁判校准与污染识别 | 分数可靠吗？怎么验证过程与结果？ |
+| **论文研究** | 研究发现、综述、能力边界与失败分析 | 哪些结论改变了对 Agent 能力的判断？ |
+| **工具框架** | Harness、沙箱、实验追踪、回归与红队工具 | 能否复用到自己的评测流程？ |
+| **评测结果** | 任务成绩、独立复现、版本比较与成本分析 | 用了什么设置？成绩是否可比？ |
+| **实践观点** | 评测落地、案例复盘、教程与方法论 | 有什么具体证据和可迁移做法？ |
 
-## 说在前面
+### 十个 Agent 场景
 
-- **我不是专业的开发者。** 我是设计师出身，半年前还看不太懂代码。这套代码是我和 AI 一起重写的，比以前干净了很多，但一定还有写得不好的地方。发现问题欢迎提 Issue，我不一定能很快回复，先说声抱歉。
-- **这是一份快照。** 它来自 AIHOT 正在线上跑的代码，不是精心打磨的通用框架。以后 AIHOT 的更新，我会尽量同步过来，但没法保证每一次都同步。
-- **里面没有 AIHOT 的信源名单和运营数据。** 仓库带了 18 个公开的海外 AI 资讯源做示范，够你跑起来看效果；真正的信源，要换成你自己行业的。
-- **请不要用 AIHOT 的名字和 Logo。** 换上你自己的名字，它就是你的站。
+| 任务场景 | 任务场景 |
+| --- | --- |
+| Code Agent | Browser Agent |
+| Computer Use | Tool/API Agent |
+| Research Agent | Customer Service Agent |
+| Terminal Agent | Multi-Agent |
+| Generalist Agent | Memory/Long-horizon |
+
+能力标签贯穿各场景：任务理解、任务规划、工具选择、参数调用、执行轨迹、状态维护、记忆、异常恢复、结果验证、可靠性、鲁棒性、安全、成本与效率、人机协作、评测污染。**标签需要原文证据，提到某个词不会自动获得对应标签。**
+
+## 精选与热门，各回答一个问题
+
+| | 精选 | 热门 |
+| --- | --- | --- |
+| 回答的问题 | **值不值得认真读？** | **有多少独立来源正在关注？** |
+| 主要依据 | 评测问题、方法增量、证据质量与可复用性 | 近期独立来源参与、时间衰减与事件归组 |
+| 可以出现的情况 | 一篇传播很少的评分修复说明，也可能入选 | 一个传播广的事件，也可能缺少高质量评测证据 |
+| 不会因为这些就成立 | 大厂发布、stars 多、宣称 SOTA、标题带 Agent | 重复抓取、单个来源反复发稿、历史资料补录 |
+
+例如，τ-bench 的评分修复如果改变了旧成绩的可比性，可能很有专业价值；一条没有具体变更说明的版本标签，通常不足以进入精选。
+
+当前沿用原有分级门槛 **T1 60 / T1_5 65 / T2 76**。后续以人工 gold set 校准筛选质量，不为填满页面调低门槛。
 
 ## 它是怎么工作的
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/how-dark.png">
-  <img src="docs/assets/how-light.png" alt="六步：采集、预筛、两次评分、写作、聚簇、热点与成刊" width="100%">
-</picture>
+```mermaid
+flowchart TD
+  A["一手信源 · RSS / 官方网页"] --> B["采集、去重与正文提取"]
+  B --> C["Agent Evaluation 相关性预筛"]
+  C --> D["内容理解、独立双评分与中文摘要"]
+  D --> E["统一发布层 · 保留人工修正"]
+  E --> F["全部资料 / 精选 / Topic"]
+  E --> G["事件归组与综述"]
+  G --> H["独立来源热度 → 热点榜"]
+  G --> I["合格材料 → 日报 / 周报 / 月报"]
+```
 
-一条资料从信源进来，先判重，再预筛；可能重要的独立打两次分，过了门槛才进精选；然后写中文标题和摘要，和别的报道聚成事件，算进热度，最后进日报。每一步的提示词都在 [`industry/prompts/`](industry/prompts/)，改标准不用改代码。详见 [精选与校准](docs/selection.md)。
+筛选与写作标准放在 [`industry/prompts/`](https://github.com/junli0324/agent-eval-radar/tree/feat/agent-eval-v0.1/industry/prompts)，可以检查、修改并用样本验证。网页、RSS、公开 API 与 MCP 共用发布读取层；**读者打开页面不会触发模型调用**。
 
-### 聚簇与热点
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/cluster-dark.png">
-  <img src="docs/assets/cluster-light.png" alt="五个来源的报道聚成一个事件，事件进入当前热点榜" width="100%">
-</picture>
-
-同一件事，官网发一篇、媒体转十篇、X 上吵一天，读者只需要看到一次。AIHOT 把它们聚成一个**事件**：先用标题摘要的向量在最近两周里找候选，再让模型判断是同一件事、后续进展，还是两件事；拿不准的合并，换一家模型再确认一遍。
-
-**热度**按事件算，不按文章算：48 小时内，每个独立来源只算一次，24 小时减半。重复抓取不会多算，一家媒体发十篇也只算一次，所以排在前面的，是真正有很多人在说的事。
-
-### 速度
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/perf-dark.png">
-  <img src="docs/assets/perf-light.png" alt="AIHOT 线上实测：页面中位数 10 毫秒，95% 在 50 毫秒内；接口中位数 6 毫秒，95% 在 12 毫秒内；文章页 95% 在 14 毫秒内" width="100%">
-</picture>
+原文日期、版本和评测设置会保留。作者报告的成绩不视为独立复现，摘要不补写原文没有的结论。默认公开中文摘要与原文链接，全文展示需要相应授权。
 
 ## 你会得到什么
 
-| | |
-|---|---|
-| **六种信源** | RSS、网页列表、JSON 接口、X 账号、微信公众号，以及你自己脚本推送进来的内容。信源分级（官方一手 / 媒体个人），抓取频率按产出自动调整 |
-| **精选** | 预筛，同一份评分标准独立打两次分，再按信源分级的门槛决定入选。提示词和门槛全部公开，全部可以改；用你自己标注的样本在 SelectBench 里校准 |
-| **写作** | 中文标题、答案先行的摘要、推荐理由、标签，外文全文翻译；防止模型把原文没提到的公司写进标题 |
-| **聚簇** | 不同来源报道的同一件事聚成一个事件，后续进展挂在同一个事件下，事件页有综述；人工改过的归属不会被覆盖 |
-| **热点** | 按事件算热度：独立来源越多越靠前，X 上的讨论也算进来；和 6 小时前比，涨得快的标上升，新出现的标“新” |
-| **日报、周报、月报** | 每天 08:00 出日报，每周一出周报，每月 1 日出月报，按分类分节，带导语 |
-| **主题与搜索** | 公司、方向、内容形态三类主题页；标题摘要搜索和全文相关搜索 |
-| **给 Agent 用** | RSS（精选、全部、全文、日报）、公开 API、MCP、`llms.txt`，同一份内容给人看也给 Agent 用 |
-| **后台** | 信源管理与试抓、内容诊断、精选评测、每一步单独换模型、付费服务的预算熔断、运行记录与告警 |
-| **AI 专属模块** | 模型榜（汇总多家公开评测，方法公开）和 Codex 重置监控。别的行业一个开关关掉 |
+| 入口 | 用法 |
+| --- | --- |
+| **精选与全部资料** | 快速阅读中文摘要，按分类、标签和关键词找材料 |
+| **Topic** | 沿着 Code Agent、Computer Use、Memory/Long-horizon 等场景持续追踪 |
+| **事件与热点** | 合并同一事件的多来源报道，区分传播热度与专业价值 |
+| **日报 / 周报 / 月报** | 在报告窗口结束后，将合格材料整理为带来源的阶段回顾 |
+| **后台 `/admin`** | 管理信源、诊断处理步骤、查看回执与预算、修正公开内容 |
+| **RSS / API / MCP** | 将公开内容接入阅读器、应用或自己的 Agent 工作流 |
 
-## 看一眼
+仓库包含 **12 个初始信源配置**，另提供 LangChain 博客和 Anthropic Research 的安装脚本；受限自动试运行只使用其中指定的 **6 个信源**。信源配置、历史试用候选和你本地实际公开的文章，是三份不同的数据。**新克隆仓库不会带走维护者的数据库或已生成内容。**
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/shots-dark.png">
-  <img src="docs/assets/shots-light.png" alt="首页的当前热点与精选，关于页的信源河" width="100%">
-</picture>
+## 本地跑起来
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/board-dark.png">
-  <img src="docs/assets/board-light.png" alt="模型榜" width="100%">
-</picture>
+先在自己的电脑试用，再决定服务器与域名。需要 **Git、Node.js 24.11+、Docker Desktop / Docker Compose**；Docker 方案会运行 PostgreSQL，无须另装本机数据库。
 
-<p align="center"><sub>截图来自用示范信源跑起来的本地站，站名是默认的 MyHOT。</sub></p>
+### 1. 获取 v0.1
 
-## 跑起来
+以下命令可在 Windows PowerShell 执行，先进入你希望保存项目的目录：
 
-想创建自己的独立站点，可以先点 [Use this template](https://github.com/KKKKhazix/AIHOT/generate)，再克隆你生成的仓库。想持续合并上游更新或贡献代码，建议先 Fork。下面的命令适合直接试用。
-
-需要 [Docker](https://docs.docker.com/get-docker/)，和一个 OpenAI 兼容的模型 API Key（DeepSeek、千问、智谱都可以）。
-
-```bash
-git clone https://github.com/KKKKhazix/AIHOT.git myhot
-cd myhot
-node scripts/init-env.ts --llm-key <你的模型 API Key>
-docker compose up -d --build
+```powershell
+git clone --branch feat/agent-eval-v0.1 https://github.com/junli0324/agent-eval-radar.git
+cd agent-eval-radar
+node scripts/init-env.ts
 ```
 
-打开 <http://localhost:3000>。后台在 `/admin`，管理员密码在 `.env` 的 `ADMIN_PASSWORD` 里。一两分钟后开始有内容，第一次导入的资料大约半小时处理完。
+初始化脚本生成本地 `.env`，并显示一次管理员密码；已有 `.env` 时会拒绝覆盖。请自己保存密码，不要分享包含密码的输出。
 
-机器上没有 Node、服务器在中国大陆、要配域名和 HTTPS，见 [部署](docs/deploy.md)。
+### 2. 先启动网站
 
-## 把它改成你的行业
+用编辑器打开 `.env`，将下列开关设为 `false`。先确认网站可访问，再开启自动处理：
 
-最省事的办法：打开你的 Agent（Claude Code、Codex 都可以），把这个仓库交给它，然后说：
-
-```text
-请读 AGENTS.md 和 docs/customize.md，把这个站改成「法律」行业的热点站。
-我关心的是：……（你想盯哪些信源，你觉得什么消息重要、什么不重要，越具体越好）。
+```dotenv
+COLLECT_ENABLED=false
+MODEL_CALLS_ENABLED=false
+FEISHU_CONTENT_PUSH_ENABLED=false
+FEISHU_INTERNAL_ENABLED=false
+INDEXNOW_SUBMIT_ENABLED=false
 ```
 
-要改的东西几乎都在 [`industry/`](industry/) 这一个文件夹里，代码基本不用动：
+```powershell
+docker compose up -d --build db api web
+docker compose ps
+```
 
-| 文件 | 改什么 |
-|---|---|
-| `site.ts` | 站名、行业词、首页文案、关于页 |
-| `taxonomy.ts`、`topics.json` | 分类、标签、主题 |
-| `sources.json` | 首次启动时导入的信源 |
-| `prompts/` | 精选标准和写作要求。**你的行业 KnowHow，就写在这里** |
-| `selection.ts` | 入选门槛 |
-| `features.ts` | 模型榜、Codex 重置监控的开关 |
-| `brand/`、`pages/` | 图标、使用规则和隐私说明 |
+打开 **<http://localhost:3000>**；后台为 **<http://localhost:3000/admin>**，管理员密码见本地 `.env` 的 `ADMIN_PASSWORD`。此阶段没有模型费用，页面尚无文章是正常现象。
 
-最值得花时间的是评分标准（`prompts/selection-score.md`）和门槛：拿一两百条你自己标注过的资料，用 `scripts/eval-selection.ts` 跑一遍，看它选得准不准，再回去改。怎么做写在 [精选与校准](docs/selection.md) 里。
+### 3. 选择内容入口
 
-## 文档
+| 想先做什么 | 接着看哪份文档 | 是否产生模型费用 |
+| --- | --- | --- |
+| 先建立一个可浏览的资料库 | [试用资料库](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/trial-library.md) → [分类覆盖补充](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/coverage-trial.md) | 导入不调用模型；分析阶段会产生费用 |
+| 先验证几条近期内容 | [近期内容试运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/recent-trial.md) | 按步骤显式开启模型调用 |
+| 已确认质量，希望自动更新 | [三天受限自动运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/auto-trial.md) | 会，分析与报告等步骤共用请求预算 |
 
-| 文档 | 内容 |
-|---|---|
-| [把它改成你的行业](docs/customize.md) | 站名、分类、信源、提示词、门槛、品牌，一步一步来 |
-| [信源](docs/sources.md) | 六种信源怎么配，分级和全文，外部推送接口 |
-| [精选与校准](docs/selection.md) | 一条资料怎么变成精选，怎么用自己的样本校准 |
-| [事件归组与关系评测](docs/grouping.md) | 事件关系怎么判断，怎么用自己的 pairwise gold set 评测 |
-| [部署](docs/deploy.md) | Docker、域名和 HTTPS、中国大陆、更新、备份、花多少钱 |
-| [架构](docs/architecture.md) | 三个进程、几条不变的规则、目录、对外出口 |
-| [模型榜与 Codex 重置监控](docs/leaderboard.md) | 两个 AI 专属模块 |
+历史资料库用于阅读与校准；保留原始日期和补录标记，不会因为今天导入就变成今天的热点或日报。
 
-技术栈：Node.js 24 · TypeScript · React Router（服务端渲染）· Fastify · PostgreSQL · pg-boss · Tailwind CSS · Docker Compose。
+## 开启受限自动运行
 
-## 交流与贡献
+v0.1 提供 **72 小时的本地自动试运行**，复用已有的采集、分析、发布、归组、综述与报告流程。它不消费普通 worker 队列中积存的历史任务。
 
-部署和使用问题到 [问答区](https://github.com/KKKKhazix/AIHOT/discussions/categories/q-a)，新想法到 [想法交流区](https://github.com/KKKKhazix/AIHOT/discussions/categories/ideas)，欢迎在 [作品展示区](https://github.com/KKKKhazix/AIHOT/discussions/categories/show-and-tell) 分享你做出的行业热点站。
+| 项目 | 当前配置 |
+| --- | --- |
+| 信源 | Inspect AI、τ-bench、DeepEval、Langfuse、LangChain 博客、Anthropic Research；仅使用已启用的合格信源 |
+| 内容范围 | 最近 14 天、有原始日期、非历史补录的候选 |
+| 模型 | 默认 `deepseek-flash`，非思考模式；准备脚本会核对模型路由 |
+| 请求上限 | 最多 5 次/分钟、30 次/小时、100 次/滚动 24 小时；已有更低上限时保留 |
+| 共享额度 | 分析、归组、事件综述、日报、周报、月报共同使用 |
+| 到期行为 | 72 小时后停止启动新任务，在途操作完成后退出；重复启动不会延期 |
+| 费用查询 | 查看本地回执、token 与模型提供商账单；未知费用不等于免费 |
 
-发现 Bug 或有明确的功能建议，可以 [提交 Issue](https://github.com/KKKKhazix/AIHOT/issues/new/choose)。准备改代码前，先看 [贡献说明](CONTRIBUTING.md)；安全漏洞请走 [私密报告入口](SECURITY.md)。
+**请求上限不是金额上限，一篇文章也可能需要多次模型请求。** 阅读网页不调用模型。实际费用受内容长度、缓存、生成量和提供商定价影响；先查看账单，再决定是否长期运行。
 
-## 最后
+在本地 `.env` 填好 `LLM_API_KEY`、`LLM_BASE_URL`、`LLM_MODEL` 与非思考配置后，按 [完整启动说明](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/auto-trial.md) 准备。受限 worker 必须使用两份 Compose 配置：
 
-AIHOT 曾经只是我无数个深夜里，一个很小、很小的念头。
+```powershell
+docker compose stop worker
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/blog-sources.ts
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts prepare
+docker compose -f docker-compose.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
+```
 
-我不知道它会被改成什么样子，会走到多远的地方。但这可能就是开源最浪漫的地方。
+检查运行状态与最近日志：
 
-剩下的路，就交给你们了。
+```powershell
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts status
+docker compose logs --tail=30 worker
+```
 
-<p align="right">—— 数字生命卡兹克</p>
+停止自动任务并恢复试运行前的预算：
 
-## 许可
+```powershell
+docker compose stop worker
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts stop
+```
 
-代码使用 [MIT 许可证](LICENSE)。AIHOT 的名字和 Logo 不在许可范围内。字体、模型厂商和评测来源的标志各有自己的许可和商标归属，见 [NOTICE](NOTICE)。
+普通 `docker compose up worker` 会启动框架默认 worker；本试运行应使用上面的双配置命令。关闭终端不影响后台容器，**电脑关机、休眠或 Docker 退出会暂停处理，72 小时截止时间仍照常计算**。长期全天运行需要一台持续在线的设备。
+
+<details>
+<summary>重启电脑后，怎样继续本地试用？</summary>
+
+打开 Docker Desktop，等待引擎就绪；使用代理联网时也要开启代理。在项目目录执行：
+
+```powershell
+docker compose up -d db api web
+docker compose -f docker-compose.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts status
+```
+
+未到期的试运行会继续；到期则不会启动新任务。停机期间的资讯不保证全部补齐。普通停止或重启会保留数据卷；不要执行 `docker compose down -v`，它会删除本地数据库卷。
+
+</details>
+
+## 为什么有些页面可能暂时为空
+
+| 页面 | 出现内容的条件 |
+| --- | --- |
+| **全部资料 / Topic / 精选** | 内容完成处理并满足各入口的发布条件；历史资料可用于阅读 |
+| **热点榜** | 近期有足够的独立来源参与；单个官方发布即使入选精选，也可能没有热度 |
+| **日报** | 报告窗口结束且有合格材料；北京时间每日 08:00 后检查 |
+| **周报** | 有合格材料的已结束周；北京时间周一 10:00 后检查 |
+| **月报** | 有合格材料的已结束月；北京时间每月 1 日 10:30 后检查 |
+
+受限 worker 约每五分钟检查报告补缺，实际完成时间受运行状态、预算和处理耗时影响。没有合格材料时不出空刊，历史补录也不填入实时报告。三天试运行可能尚未经过周报或月报的出刊时间。
+
+## 开发与校准
+
+技术栈：**Node.js 24 · TypeScript · React Router · Fastify · PostgreSQL · pg-boss · Tailwind CSS · Docker Compose**。
+
+行业定制主要位于 `industry/`，包名和内部技术命名保留上游命名空间，站点名称、雷达标识和报告品牌已独立。
+
+| 位置 | 内容 |
+| --- | --- |
+| [`industry/site.ts`](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/site.ts) | 站点身份、首页与关于页文案 |
+| [`taxonomy.ts`](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/taxonomy.ts)、[`topics.json`](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/topics.json) | 分类、场景与能力标签 |
+| [`sources.json`](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/sources.json) | 初始信源；已有数据库配置通过相应升级脚本管理 |
+| [`prompts/`](https://github.com/junli0324/agent-eval-radar/tree/feat/agent-eval-v0.1/industry/prompts) | 预筛、评分、理解、归组与报告标准 |
+| [`v0.1/`](https://github.com/junli0324/agent-eval-radar/tree/feat/agent-eval-v0.1/industry/v0.1) | 本地资料库、校准记录与受限自动运行入口 |
+
+CI 会执行类型检查、后端测试、Web 构建与测试、站点 smoke / MCP 检查，以及 Docker Compose 基础链路验证。测试关闭外部采集和真实模型调用；测试数据库必须以 `_test` 或 `_ci` 结尾。具体步骤见 [AGENTS.md](AGENTS.md) 与 [验证记录](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/validation.md)。**工程检查通过，不代表筛选准确率已经得到验证。**
+
+后续重点是建立独立人工 gold set：覆盖应入选、仅相关、应拦截和容易混淆的案例，分别检查预筛、精选、分类标签与摘要事实。将开发样本与最终评估集分开，先定位误筛原因，再调整提示词与门槛。当前试用目录不是独立测试集。
+
+## 文档导航
+
+以下功能文档均指向当前 v0.1 开发分支。
+
+| 文档 | 用途 |
+| --- | --- |
+| [三天受限自动运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/auto-trial.md) | 启动、状态、停止、预算与运行边界 |
+| [试用资料库](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/trial-library.md) / [分类覆盖补充](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/coverage-trial.md) | 建立可浏览的历史资料库 |
+| [近期内容试运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/recent-trial.md) | 显式控制采集、提取、分析与发布 |
+| [Topic 与阅读入口](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/topics-reading-update.md) / [报告与资料回顾](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/reports-reading-update.md) | 理解页面展示与历史补录 |
+| [信源取舍](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/sources.md) / [gold set 校准](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/calibration.md) | 检查垂直筛选标准与评估计划 |
+| [精选机制](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/docs/selection.md) / [事件归组](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/docs/grouping.md) | 理解评分、门槛与关系判定 |
+| [部署](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/docs/deploy.md) / [架构](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/docs/architecture.md) | Docker、备份、域名、HTTPS 与内部结构 |
+
+## 反馈与下一步
+
+欢迎在 [Issues](https://github.com/junli0324/agent-eval-radar/issues) 提交信源建议、误筛样本、摘要错误和使用问题。附上原文链接、问题所在与期望判断，有助于复现和校准。不要附带 API Key、密码或完整 `.env`。
+
+当前优先完善 **信源稳定性 → gold set 与筛选校准 → 自动报告质量 → 长期运行与部署**。v0.1 保持现有数据结构，暂不引入复杂 Benchmark Card。上线公开服务前，运营者还需确认使用规则、隐私说明、联系方式与内容权限。
+
+## 来源与许可
+
+本项目由 [AIHOT Template](https://github.com/KKKKhazix/AIHOT) 创建，感谢上游提供完整的网站框架与公开的筛选、归组和报告机制。本 README 的展示结构也参考了上游。
+
+**AgentEval Radar 是独立项目，使用自己的名称与雷达标识。** 代码采用 [MIT License](LICENSE)，保留原作者版权声明；第三方内容、字体和标志的权利归属见 [NOTICE](NOTICE)。聚合摘要不改变原文版权，阅读与引用请以来源页面为准。
 
 ---
 
-<sub>**In English:** AIHOT ([aihot.news](https://aihot.news)) is an AI news site that collects from many sources, lets a language model filter and score every item twice, writes Chinese headlines and summaries, clusters reports of the same story into one event, ranks events by how many independent sources discuss them, and publishes a daily briefing. This repository is its complete framework, including every prompt and threshold. Hand it to your coding agent with `AGENTS.md` and `docs/customize.md` to turn it into a news site for your own field. The documentation is in Chinese.</sub>
+<sub><b>In English:</b> AgentEval Radar is a Chinese-first intelligence hub for evaluating AI agents: benchmarks, methods, research, tooling, results, and practice. It separates editorial value from attention, preserves source links and evaluation context, and provides a bounded local automation trial. The v0.1 implementation lives on the <code>feat/agent-eval-v0.1</code> branch.</sub>
