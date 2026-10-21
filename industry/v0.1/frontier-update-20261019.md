@@ -30,7 +30,7 @@ docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api
 docker compose exec -T -e COLLECT_ENABLED=true -e MODEL_CALLS_ENABLED=false api node industry/v0.1/trial-library.ts import --set=coverage --limit=6
 ```
 
-复制的是仓库内的 UTF-8 文件，不包含 `.env` 或密钥，不通过 PowerShell 管道传中文。安装脚本只创建缺少的来源；重复执行不改配置、游标、已有分级或人工启停状态。发现来源配置冲突时整个安装回滚，交由后台核对。没有请求外网或模型；最后的导入命令才请求原始出版页，无模型调用。arXiv 页面访问间隔至少 3.5 秒，遇到 429 停止，不立即重试。
+复制的是仓库内的 UTF-8 文件，不包含 `.env` 或密钥，不通过 PowerShell 管道传中文。安装脚本创建缺少的来源，并仅迁移精确匹配已知旧版本的 Anthropic 列表配置；重复执行保留游标、已有分级、人工启停和下次采集时间。其他来源配置冲突时整个安装回滚，交由后台核对。没有请求外网或模型；最后的导入命令才请求原始出版页，无模型调用。arXiv 页面访问间隔至少 3.5 秒，遇到 429 停止，不立即重试。
 
 导入后先查看：
 
@@ -60,3 +60,20 @@ docker compose exec -T -e COLLECT_ENABLED=true -e MODEL_CALLS_ENABLED=false api 
 ```
 
 初始化条目也是补录，出现近期候选 0 属于预期。此后按间隔检查，真正新发现且符合时效的材料才进入 `recent-trial.ts status` 的近期列表；不要重复初始化、改游标或移除归档标记来填日报。需要定时运行时再接持续任务，本轮 worker 保持停止。
+
+## 2026-10-21：Anthropic 列表结构适配
+
+官方 Research 页已从 `PublicationList` 链接切换为带 `data-listing-row` 的 `article` 卡片。新规则兼容两种结构，明确从 `h3` 中取正文链接与标题，从同一卡片的 `time` 取日期，避开排在标题前的团队、图片链接及导航。标题关键词与精选门槛均保持不变。真实页面本地回放得到 22 条允许路径内的文章，标题过滤后 3 条，均有日期；旧页面回放也可解析。这些只是采集候选，不是精选结论。
+
+遇到 `no items matched (html)` 后更新配置：
+
+```powershell
+git -c http.proxy=http://127.0.0.1:7897 -c http.version=HTTP/1.1 pull --ff-only origin feat/agent-eval-v0.1
+docker compose cp industry/v0.1/blog-sources.ts api:/app/industry/v0.1/blog-sources.ts
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/blog-sources.ts
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/recent-trial.ts status
+```
+
+Anthropic 项应显示 `configUpdated: true`，再次执行为 `false`。安装不重置失败计数或退避时间，也不重新初始化历史。按 `status` 中的 `next_fetch_at` 到期后，才执行一次 Anthropic 单源采集。首次失败的默认退避最长六小时；未到期会返回 `not-due`，无需连续重试。LangChain 已抓到的内容保留，可以先处理其中符合近期规则的候选。
+
+此修复仅修改 `industry/` 与测试，不增加适配器或数据库字段，不调用模型，不提交环境变量。容器以后重建时正常构建新镜像即可带上配置文件。
