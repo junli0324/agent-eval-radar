@@ -1,0 +1,14 @@
+# Merge with the repository-root docker-compose.yml; .env stays unchanged.
+services:
+  worker:
+    command: ["node", "industry/v0.1/auto-trial-worker.ts"]
+    restart: "on-failure:3"
+    environment:
+      AGENT_EVAL_AUTO_TRIAL: "true"
+      COLLECT_ENABLED: "true"
+      MODEL_CALLS_ENABLED: "true"
+      ANALYZE_CONCURRENCY: "1"
+      EMBEDDINGS_ENABLED: "false"
+      FEISHU_CONTENT_PUSH_ENABLED: "false"
+      FEISHU_INTERNAL_ENABLED: "false"
+      INDEXNOW_SUBMIT_ENABLED: "false"
