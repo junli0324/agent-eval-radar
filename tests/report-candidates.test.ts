@@ -167,12 +167,13 @@ test("daily composition waits for a pre-cutoff release to commit instead of losi
     commit.open();
     await publication;
     await report;
-    await composeDaily("2020-01-05");
+    assert.equal((await composeDaily("2020-01-05")).entries, 0);
     const reports = await sql<{ key: string; content: { sections: Array<{ items: Array<{ itemId: string }> }> } }[]>`
       SELECT key, content FROM reports WHERE kind = 'daily' AND key IN ('2020-01-04', '2020-01-05')`;
-    const hasItem = (key: string) => reports.find((r) => r.key === key)!.content.sections.some((s) => s.items.some((item) => item.itemId === id));
+    const hasItem = (key: string) => reports.find((r) => r.key === key)?.content.sections.some((s) => s.items.some((item) => item.itemId === id)) ?? false;
     assert.equal(hasItem("2020-01-04"), true);
     assert.equal(hasItem("2020-01-05"), false);
+    assert.equal(reports.some(r => r.key === "2020-01-05"), false, "an empty next window has no saved edition");
   } finally {
     commit.open();
     await Promise.allSettled([publication, report]);
