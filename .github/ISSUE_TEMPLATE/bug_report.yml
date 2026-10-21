@@ -5,8 +5,8 @@ body:
   - type: markdown
     attributes:
       value: |
-        部署与使用问题可以先到 [问答区](https://github.com/KKKKhazix/AIHOT/discussions/categories/q-a) 交流。
-        安全漏洞请通过 [私密漏洞报告](https://github.com/KKKKhazix/AIHOT/security/advisories/new) 提交。
+        这里接收 AgentEval Radar 的安装、运行与网页故障；误筛或摘要问题请使用“误筛／摘要错误”表单。
+        安全漏洞请通过 [私密漏洞报告](https://github.com/junli0324/agent-eval-radar/security/advisories/new) 提交。
         请勿上传完整 .env、API Key、管理员密码、Cookie 或生产数据库。
   - type: input
     id: revision
@@ -21,7 +21,7 @@ body:
     attributes:
       label: 运行环境
       description: 写明系统、Docker 或本机部署、相关版本；网页问题请注明浏览器。
-      placeholder: Ubuntu / macOS；Docker Compose / Node.js；是否有反向代理；是否改过相关配置。
+      placeholder: Windows / Ubuntu / macOS；Docker Compose / Node.js；普通或受限 worker；是否使用代理。
     validations:
       required: true
   - type: textarea

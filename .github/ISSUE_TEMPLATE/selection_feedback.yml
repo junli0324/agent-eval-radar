@@ -1,0 +1,48 @@
+name: 误筛／摘要错误
+description: 反馈 Agent 评测内容的漏选、误选、分类标签或摘要事实问题。
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请提供可核对的原文证据。此表单用于收集开发与校准样本，不会自动改写站点内容或精选门槛。
+        不要提交 API Key、密码、完整 .env、个人数据或私有日志；安全问题请走本仓库私密漏洞报告。
+  - type: input
+    id: source
+    attributes:
+      label: 原文链接
+      description: 优先提供论文、官方文档、Release 或评测报告的公开原始链接。
+    validations:
+      required: true
+  - type: input
+    id: article
+    attributes:
+      label: 站内链接或文章 ID（可选）
+      description: 本地站点无法被维护者直接访问时，写文章 ID 或标题即可。
+  - type: dropdown
+    id: problem-type
+    attributes:
+      label: 问题类型
+      options:
+        - 不相关内容被收录或入选
+        - 相关内容被拦截或遗漏
+        - 相关但精选判断不合适
+        - 分类或标签缺少证据
+        - 中文标题或摘要事实错误
+        - 日期、版本或评测设置混淆
+        - 其他内容质量问题
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 当前结果
+      description: 贴出有问题的标题、摘要、标签或筛选结果，注明分支／提交与模型（如已知）。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望判断与原文证据
+      description: 说明被评测的 Agent、任务、评分方式或事实依据；区分“相关”和“值得精选”。成绩请注明版本、设置及作者报告／独立复现属性。
+    validations:
+      required: true
