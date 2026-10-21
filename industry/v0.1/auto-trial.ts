@@ -147,9 +147,14 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
   const ids = sources.map(s => s.id);
   if (ids.length) {
     const cutoff = new Date(+now - RECENT_DAYS * 86400000);
-    const rows = await sql`SELECT a.id FROM articles a WHERE a.source_id IN ${sql(ids)} AND NOT a.backfill
+    const rows = await sql`SELECT a.id FROM articles a
+      LEFT JOIN LATERAL (SELECT id, input_revision, relevance FROM analyses WHERE article_id = a.id ORDER BY input_revision DESC, id DESC LIMIT 1) n ON true
+      LEFT JOIN publications p ON p.article_id = a.id
+      WHERE a.source_id IN ${sql(ids)} AND NOT a.backfill
       AND a.published_at >= ${cutoff} AND a.published_at <= ${now} AND a.discovered_at >= ${cutoff}
       AND (a.processing_retry_at IS NULL OR a.processing_retry_at <= ${now})
+      AND (n.input_revision IS DISTINCT FROM a.revision OR p.article_id IS NULL OR p.analysis_id IS DISTINCT FROM n.id
+        OR (n.relevance = 'pass' AND a.grouped_at IS NULL AND p.visibility = 'public'))
       ORDER BY a.published_at DESC, a.id LIMIT 30`;
     for (const row of rows) {
       if (!canWork(t)) return { status: "ended", counts };
@@ -186,8 +191,10 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
     }
     if (canWork(t)) {
       const stories = await sql`SELECT DISTINCT p.story_id FROM publications p JOIN articles a ON a.id = p.article_id
+        JOIN stories st ON st.id = p.story_id AND st.merged_into IS NULL
         WHERE a.source_id IN ${sql(ids)} AND NOT a.backfill AND a.published_at >= ${cutoff} AND p.visibility = 'public' AND p.eligible
-          AND p.story_id IS NOT NULL AND (NOT p.selected OR p.visible_after <= ${now}) LIMIT 20`;
+          AND (st.digest_updated_at IS NULL OR p.updated_at > st.digest_updated_at)
+          AND (NOT p.selected OR p.visible_after <= ${now}) ORDER BY p.story_id LIMIT 20`;
       for (const s of stories) {
         if (!canWork(t)) break;
         await assertBudget(t!);
