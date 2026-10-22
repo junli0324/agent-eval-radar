@@ -10,7 +10,7 @@ import { upsertMaterial } from '@aihot/backend/content/materials';
 import { publishArticle } from '@aihot/backend/publication/publish';
 import { CAPABILITIES, invalidateModelCache } from '@aihot/backend/editorial/models';
 import { BudgetExceededError } from '@aihot/backend/providers/receipts';
-import { prepareTrial, stopTrial, runTrialTick, TRIAL_KEY, TRIAL_LOCK, trialStatus, trialActive } from '../industry/v0.1/auto-trial.ts';
+import { prepareTrial, stopTrial, runTrialTick, TRIAL_KEY, TRIAL_LOCK, trialStatus, trialActive, trialDiagnostics } from '../industry/v0.1/auto-trial.ts';
 
 after(async () => { await stopBoss(); await closeDb(); });
 
@@ -75,6 +75,12 @@ test('bounded automation preserves history and queued work, expires, shares the 
     };
     const tick = await runTrialTick({ operations });
     assert.equal(tick.status, 'ok'); assert.deepEqual(grouped, [ids[0]]); assert.deepEqual(extracted, [ids[3]]);
+    const diagnostic = await trialDiagnostics();
+    assert.equal(diagnostic.pipeline!.waiting_for_body, 1);
+    assert.equal(diagnostic.pipeline!.ready_for_analysis, 0);
+    assert.equal(diagnostic.pipeline!.recent_candidates, 32, 'diagnostic excludes archived, undated, future, paused and outside-source material');
+    assert.equal(diagnostic.pipeline!.ordinary_public, 31);
+    assert.ok(diagnostic.missingSources.includes('rss-arxiv-agent-papers'));
     assert.deepEqual((await sql`SELECT article_id FROM publications WHERE article_id IN ${sql(ids)}`).map(r => r.article_id), [ids[0]]);
     assert.equal((await sql`SELECT state FROM pgboss.job WHERE id = ${historyJob!.id}`)[0]!.state, historyJob!.state, 'historical job remains untouched');
     await runTrialTick({ operations }); assert.equal(grouped.length, 1, 'a grouped item is not grouped again');
