@@ -120,6 +120,33 @@ export async function trialStatus() {
     sources: RECENT_SOURCES, modelCalls: 0, note: "100 requests is a rolling 24-hour ceiling shared by analysis, grouping, digests and reports, not a currency limit. Existing queues are not consumed." };
 }
 
+/** Read-only diagnostics for the CLI; the minute worker heartbeat does not run these queries. */
+export async function trialDiagnostics(now = new Date()) {
+  const cutoff = new Date(+now - RECENT_DAYS * 86400000);
+  const sources = await sql`SELECT s.id, s.name, s.enabled, s.health, s.fail_count, s.last_ok_at, s.next_fetch_at,
+      (s.enabled AND s.participation_mode = 'editorial' AND s.kind IN ('rss', 'web_list') AND NOT s.site_fulltext AND NOT s.syndicate_fulltext) AS trial_eligible,
+      r.status AS last_run_status, r.found_count, r.new_count, r.finished_at,
+      coalesce((r.detail->>'notModified')::boolean, false) AS not_modified,
+      (SELECT count(*)::int FROM articles a WHERE a.source_id = s.id AND a.backfill) AS archived_count
+    FROM sources s LEFT JOIN LATERAL (SELECT * FROM fetch_runs WHERE source_id = s.id ORDER BY id DESC LIMIT 1) r ON true
+    WHERE s.id IN ${sql(RECENT_SOURCES)} ORDER BY s.id`;
+  const [pipeline] = await sql`SELECT count(*)::int AS recent_candidates,
+      count(*) FILTER (WHERE n.input_revision = a.revision AND n.relevance = 'block')::int AS blocked,
+      count(*) FILTER (WHERE n.input_revision IS DISTINCT FROM a.revision AND a.body_status = 'ok')::int AS ready_for_analysis,
+      count(*) FILTER (WHERE n.input_revision IS DISTINCT FROM a.revision AND a.body_status <> 'ok')::int AS waiting_for_body,
+      count(*) FILTER (WHERE a.processing_retry_at > ${now})::int AS retry_waiting,
+      count(*) FILTER (WHERE p.eligible AND p.visibility = 'public' AND p.selected AND p.visible_after <= ${now})::int AS selected_released,
+      count(*) FILTER (WHERE p.eligible AND p.visibility = 'public' AND NOT p.selected)::int AS ordinary_public
+    FROM articles a JOIN sources s ON s.id = a.source_id
+    LEFT JOIN LATERAL (SELECT input_revision, relevance FROM analyses WHERE article_id = a.id ORDER BY input_revision DESC, id DESC LIMIT 1) n ON true
+    LEFT JOIN publications p ON p.article_id = a.id
+    WHERE a.source_id IN ${sql(RECENT_SOURCES)} AND s.enabled AND s.participation_mode = 'editorial'
+      AND s.kind IN ('rss', 'web_list') AND NOT s.site_fulltext AND NOT s.syndicate_fulltext AND NOT a.backfill
+      AND a.published_at >= ${cutoff} AND a.published_at <= ${now} AND a.discovered_at >= ${cutoff}`;
+  return { sourceHealth: sources, missingSources: RECENT_SOURCES.filter(id => !sources.some(s => s.id === id)), pipeline,
+    diagnosticNote: "Read-only. found_count=0 with not_modified=true means HTTP 304. Counts cover recent eligible sources; retry_waiting may overlap body/analysis counts. Backfill is separate." };
+}
+
 const productionOps = { collect: collectSource, extract: (id: string) => extractArticleBody(id, false), analyze: analyzeArticle,
   publish: publishArticle, group: groupArticle, digest: composeStoryDigest, reports: catchUpReports, hot: computeHotRanking };
 type Operations = typeof productionOps;
@@ -130,7 +157,7 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
   if (!trialActive(t, now) || shutdownSignal.signal.aborted) return { status: "inactive" };
   await assertBudget(t!);
   const ops = { ...productionOps, ...options.operations };
-  const counts = { collected: 0, analyzed: 0, published: 0, grouped: 0, digests: 0 };
+  const counts = { collected: 0, found: 0, created: 0, revised: 0, analyzed: 0, published: 0, grouped: 0, digests: 0 };
   const errors: Array<{ step: string; id: string; reason: string }> = [];
   const sources = await sql`SELECT id, next_fetch_at FROM sources WHERE id IN ${sql(RECENT_SOURCES)} AND enabled
     AND participation_mode = 'editorial' AND kind IN ('rss', 'web_list') AND NOT site_fulltext AND NOT syndicate_fulltext`;
@@ -139,6 +166,7 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
     if (!canWork(t)) return { status: "ended", counts };
     try {
       const result = await ops.collect(s.id);
+      counts.found += result.found; counts.created += result.created; counts.revised += result.revised;
       if (result.status === 'failed') errors.push({ step: "collect", id: s.id, reason: "Source collection failed; normal backoff applies" });
       else counts.collected++;
     }
@@ -218,7 +246,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const [command, ...extra] = process.argv.slice(2);
     if (extra.length || !['prepare', 'status', 'stop'].includes(command ?? '')) throw new Error("Use prepare, status or stop");
-    console.log(JSON.stringify(command === 'prepare' ? await prepareTrial() : command === 'stop' ? await stopTrial() : await trialStatus(), null, 2));
+    console.log(JSON.stringify(command === 'prepare' ? await prepareTrial() : command === 'stop' ? await stopTrial() : { ...await trialStatus(), ...await trialDiagnostics() }, null, 2));
   } catch (error) { console.error(error instanceof Error ? error.message : "Trial management failed"); process.exitCode = 1; }
   finally { await closeDb(); }
 }

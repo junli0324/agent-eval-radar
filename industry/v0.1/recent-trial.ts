@@ -54,7 +54,7 @@ export async function recentStatus() {
   const rows = await recentRows();
   return { sources, recentCandidates: rows.length, readyForAnalysis: rows.filter(a => a.body_status === "ok" && a.input_revision !== a.revision).length,
     articles: rows.slice(0, 20), showing: Math.min(rows.length, 20),
-    note: "Only dated non-backfill articles from the last 14 days. Archived items and the historical trial library stay unchanged. Worker must remain stopped." };
+    note: "Read-only status; worker may keep running. Only dated non-backfill articles from the last 14 days; archived items and the historical trial library stay unchanged. Stop the worker before manual processing commands." };
 }
 
 export async function dailyPreview(date?: string, now = new Date()) {

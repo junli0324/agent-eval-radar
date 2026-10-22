@@ -1,7 +1,8 @@
 import { addDays, beijingDate, isValidDate } from "@aihot/contracts/time";
+import { FRONTIER_SOURCES } from "./frontier-catalog.ts";
 
-// Deliberately excludes broad feeds and the currently rate-limited arXiv endpoint.
-export const RECENT_SOURCES = ["rss-inspect-ai", "rss-tau2-bench", "rss-deepeval", "rss-langfuse", "web-langchain-blog", "web-anthropic-research"];
+// Keep the old rate-limited arXiv search API excluded; the optional daily feed has its own ID.
+export const RECENT_SOURCES = ["rss-inspect-ai", "rss-tau2-bench", "rss-deepeval", "rss-langfuse", "web-langchain-blog", "web-anthropic-research", ...FRONTIER_SOURCES.map(s => s.id)];
 export const RECENT_DAYS = 14;
 export const damagedCopy = (v: unknown): boolean => typeof v === "string"
   ? /\?{2,}|\uFFFD/.test(v) : Array.isArray(v) && v.some(damagedCopy);

@@ -4,7 +4,7 @@
 
 ## 范围与费用保护
 
-- 白名单为 Inspect AI、τ-bench、DeepEval、Langfuse、LangChain 博客、Anthropic Research。只采集其中已启用、editorial、摘要展示的 RSS / web_list，遵守原有到期时间、退避及导入上限。
+- 白名单为原六源（Inspect AI、τ-bench、DeepEval、Langfuse、LangChain 博客、Anthropic Research），加 arXiv 新论文公告、METR、Anthropic Engineering、Simon Willison 评测专题、Hamel 评测实践，共 11 个入口；新增入口须先按[扩充说明](frontier-sources.md)安装。只采集其中已启用、editorial、摘要展示的 RSS / web_list，遵守原有到期时间、退避及导入上限。
 - 每轮最多检查 30 条最近 14 天、有原始日期、非补录的资料；正文成功后才分析。单篇顺序处理，质量检查通过后自动发布，拦截结果不会成为公开阅读材料。人工覆盖仍由原发布层保留。
 - 只使用当前默认的 `deepseek-flash` 非思考模式。用准备脚本核对各实际调用能力的模型路由；如存在其他模型覆盖，停止配置并提示核对。所有付费步骤继续经过现有回执和预算。
 - `llm` 服务最多 5 次/分钟、30 次/小时、100 次/滚动 24 小时；原上限更低时保留更低值。重试计入次数，已有调用记录不清零。分析、归组、综述、报告共用额度。这是请求上限，不是人民币金额上限。
@@ -23,6 +23,8 @@ docker compose stop worker
 git -c http.proxy=http://127.0.0.1:7897 -c http.version=HTTP/1.1 pull --ff-only origin feat/agent-eval-v0.1
 docker compose build api
 docker compose up -d --no-deps api web
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/blog-sources.ts
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/frontier-sources.ts
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts prepare
 docker compose -f docker-compose.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
 ```
@@ -34,7 +36,7 @@ docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api
 docker compose logs --tail=30 worker
 ```
 
-状态输出试运行截止时间、滚动 24 小时实际请求次数、试运行回执 token、未知费用回执数和最后一轮结果。`modelCalls: 0` 仅表示这条状态查询本身不调用模型，不表示后台没有费用。账单以 DeepSeek 为准。关闭 PowerShell 不影响后台容器；睡眠、关机或代理断开会影响连续运行。非正常退出最多重启三次；到期正常退出不重启。
+状态查询还输出 `sourceHealth`、`missingSources` 和 `pipeline`，可区分 HTTP 304、无新增、被拦截与正文未就绪；详见[诊断说明](frontier-sources.md#直接看原因)。状态输出试运行截止时间、滚动 24 小时实际请求次数、试运行回执 token、未知费用回执数和最后一轮结果。`modelCalls: 0` 仅表示这条状态查询本身不调用模型，不表示后台没有费用。账单以 DeepSeek 为准。关闭 PowerShell 不影响后台容器；睡眠、关机或代理断开会影响连续运行。非正常退出最多重启三次；到期正常退出不重启。
 
 ## 停止与恢复预算
 
