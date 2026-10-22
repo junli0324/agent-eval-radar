@@ -31,7 +31,7 @@ test("update notice persists acknowledgement, handles other tabs/offline/hidden 
     return new Response(fail ? '{}' : JSON.stringify(reply), { status: fail ? 503 : 200, headers: { "content-type": "application/json" } });
   };
   const vite = await createServer({ configFile: false, root: fileURLToPath(new URL("..", import.meta.url)),
-    server: { middlewareMode: true }, esbuild: { jsx: "automatic" } });
+    server: { middlewareMode: true } });
   let root = createRoot(document.getElementById("root")!);
   const settle = async (action: () => void) => act(async () => { action(); await new Promise(resolve => setTimeout(resolve, 10)); });
   const click = async (label: string) => settle(() => {
