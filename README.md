@@ -103,7 +103,7 @@ flowchart TD
 | **后台 `/admin`** | 管理信源、诊断处理步骤、查看回执与预算、修正公开内容 |
 | **RSS / API / MCP** | 将公开内容接入阅读器、应用或自己的 Agent 工作流 |
 
-仓库包含 **12 个初始信源配置**，另提供 LangChain 博客和 Anthropic Research 的安装脚本；受限自动试运行只使用其中指定的 **6 个信源**。信源配置、历史试用候选和你本地实际公开的文章，是三份不同的数据。**新克隆仓库不会带走维护者的数据库或已生成内容。**
+仓库包含 **12 个初始信源配置**，另提供博客与[论文／实践入口安装脚本](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/frontier-sources.md)；受限自动试运行白名单扩展为 **11 个入口**，仅使用已安装并启用的合格来源。信源配置、历史试用候选和你本地实际公开的文章，是三份不同的数据。**新克隆仓库不会带走维护者的数据库或已生成内容。**
 
 ## 本地跑起来
 
@@ -156,7 +156,7 @@ v0.1 提供 **72 小时的本地自动试运行**，复用已有的采集、分�
 
 | 项目 | 当前配置 |
 | --- | --- |
-| 信源 | Inspect AI、τ-bench、DeepEval、Langfuse、LangChain 博客、Anthropic Research；仅使用已启用的合格信源 |
+| 信源 | 原六源，加 arXiv 新论文公告、METR、Anthropic Engineering、Simon Willison 评测专题和 Hamel 评测实践；仅使用已安装并启用的合格来源 |
 | 内容范围 | 最近 14 天、有原始日期、非历史补录的候选 |
 | 模型 | 默认 `deepseek-flash`，非思考模式；准备脚本会核对模型路由 |
 | 请求上限 | 最多 5 次/分钟、30 次/小时、100 次/滚动 24 小时；已有更低上限时保留 |
@@ -171,6 +171,7 @@ v0.1 提供 **72 小时的本地自动试运行**，复用已有的采集、分�
 ```powershell
 docker compose stop worker
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/blog-sources.ts
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/frontier-sources.ts
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts prepare
 docker compose -f docker-compose.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
 ```
@@ -242,6 +243,7 @@ CI 会执行类型检查、后端测试、Web 构建与测试、站点 smoke / M
 
 | 文档 | 用途 |
 | --- | --- |
+| [论文与实践信源扩充](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/frontier-sources.md) | 已有试运行升级、来源取舍与停更诊断 |
 | [三天受限自动运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/auto-trial.md) | 启动、状态、停止、预算与运行边界 |
 | [试用资料库](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/trial-library.md) / [分类覆盖补充](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/coverage-trial.md) | 建立可浏览的历史资料库 |
 | [近期内容试运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/recent-trial.md) | 显式控制采集、提取、分析与发布 |
