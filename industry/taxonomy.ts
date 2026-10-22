@@ -8,12 +8,12 @@
  * 没归上类的资料在日报里放进第一个 key 为 industry 的类别所在的节（没有就放最后一节）。
  */
 export const CATEGORIES = [
-  { key: "ai-models", label: "模型", section: "模型发布/更新", guide: "新模型、模型版本、权重开放、模型能力与价格变化的发布与评测结果" },
-  { key: "ai-products", label: "产品", section: "产品发布/更新", guide: "AI 产品、功能、应用、工具、API 与平台的发布和更新" },
-  { key: "industry", label: "行业", section: "行业动态", guide: "公司经营、融资并购、人事、合作、诉讼、监管与政策、市场与基础设施" },
-  { key: "paper", label: "论文", section: "论文研究", guide: "研究论文、技术报告、基准与数据集" },
-  { key: "tip", label: "教程", section: "技巧与观点", guide: "教程、实践经验、使用技巧、提示词与工具用法、深度技术讲解" },
-  { key: "opinion", label: "观点", section: "技巧与观点", guide: "人物观点、评论、分析、访谈、现象与趋势讨论" },
+  { key: "benchmarks", label: "评测基准", section: "评测基准", guide: "Benchmark、评测数据集、任务环境的首次发布或实质版本更新；论文提出新基准时优先归此类" },
+  { key: "methods", label: "评测方法", section: "评测方法", guide: "指标、评分协议、LLM-as-Judge 校准、轨迹分析、统计检验与评测污染识别；以方法贡献为核心" },
+  { key: "paper", label: "论文研究", section: "论文研究", guide: "Agent Evaluation 的研究论文、综述与技术报告；核心是研究发现，非基准或方法发布" },
+  { key: "tools", label: "工具框架", section: "工具框架", guide: "评测 Harness、测试框架、实验追踪、数据标注、回归与红队工具的发布或实质更新" },
+  { key: "results", label: "评测结果", section: "评测结果", guide: "在已有基准或真实任务上报告 Agent 成绩、独立复现、失败分析与能力边界；不得混淆版本与设置" },
+  { key: "practice", label: "实践观点", section: "实践观点", guide: "评测落地经验、案例复盘、方法论观点与教程；应有具体评测问题、证据或可迁移做法" },
 ] as const;
 
 /**
@@ -25,36 +25,49 @@ export const ITEM_TYPES = ["model_release", "product_launch", "tool_or_prompt", 
 // ── 标签词表 ────────────────────────────────────────────────────────────────────────────
 
 /** 每篇资料的第一个标签必须是这些“分类标签”之一。 */
-export const CATEGORY_TAGS = [
-  "产品更新", "模型发布", "论文/研究", "开源/仓库", "教程/实践", "现象/趋势", "大佬观点", "评测/基准", "安全/对齐", "行业动态", "政策/监管",
-  "非AI/通用工具", "其他",
-] as const;
+export const CATEGORY_TAGS = ["评测基准", "评测方法", "论文研究", "工具框架", "评测结果", "实践观点"] as const;
 
-/** 可选的主题标签。 */
-export const TOPIC_TAGS = [
-  "Agent", "编码", "推理", "多模态", "语音", "视频", "图像生成", "RAG", "端侧", "数据/训练", "搜索", "部署/工程", "开源生态", "具身智能", "MCP/工具调用",
-] as const;
+/** 场景与能力共用现有主题标签字段，不增加数据库字段。 */
+export const TOPIC_TAGS = ["Code Agent", "Browser Agent", "Computer Use", "Tool/API Agent", "Research Agent", "Customer Service Agent", "Terminal Agent", "Multi-Agent", "Generalist Agent", "Memory/Long-horizon", "任务理解", "任务规划", "工具选择", "参数调用", "执行轨迹", "状态维护", "记忆", "异常恢复", "结果验证", "可靠性", "鲁棒性", "安全", "成本与效率", "人机协作", "评测污染"] as const;
 
 /** 可选的实体标签（公司、机构、平台）。 */
 export const ENTITY_TAGS = ["OpenAI", "Anthropic", "DeepSeek", "DeepMind", "Google", "Meta", "Microsoft", "xAI", "Hugging Face", "GitHub", "arXiv"] as const;
 
 /** 模型常写的近义词，统一成词表里的写法。 */
 export const TAG_SYNONYMS: Readonly<Record<string, string>> = {
-  "教程/玩法": "教程/实践", "技巧/最佳实践": "教程/实践", "合作/生态": "行业动态", "融资/收购": "行业动态", "公司动态": "行业动态",
-  合作: "行业动态", 生态: "行业动态", 融资: "行业动态", 收购: "行业动态", 投资: "行业动态", 并购: "行业动态",
-  政策: "政策/监管", 监管: "政策/监管", 法规: "政策/监管", 安全: "安全/对齐", 对齐: "安全/对齐",
-  论文: "论文/研究", 研究: "论文/研究", paper: "论文/研究", papers: "论文/研究",
-  "open-source": "开源/仓库", 开源: "开源/仓库", 仓库: "开源/仓库", repo: "开源/仓库",
-  教程: "教程/实践", 玩法: "教程/实践", 指南: "教程/实践", 技巧: "教程/实践", 最佳实践: "教程/实践", 实践: "教程/实践",
-  产品: "产品更新", 更新: "产品更新", 发布: "模型发布", 模型: "模型发布", 趋势: "现象/趋势", 现象: "现象/趋势", 观点: "大佬观点",
-  视频生成: "视频", 非ai: "非AI/通用工具", "non-ai": "非AI/通用工具", 通用工具: "非AI/通用工具", 工程工具: "非AI/通用工具",
-  安全扫描: "非AI/通用工具", devops: "非AI/通用工具", 行业: "行业动态", 动态: "行业动态",
+  "benchmark": "评测基准",
+  "评测/基准": "评测基准",
+  "论文": "论文研究",
+  "论文/研究": "论文研究",
+  "研究": "论文研究",
+  "paper": "论文研究",
+  "开源/仓库": "工具框架",
+  "开源": "工具框架",
+  "教程/实践": "实践观点",
+  "教程": "实践观点",
+  "实践": "实践观点",
+  "观点": "实践观点",
+  "大佬观点": "实践观点",
+  "编码": "Code Agent",
+  "coding agent": "Code Agent",
+  "browser agent": "Browser Agent",
+  "computer use": "Computer Use",
+  "tool use": "Tool/API Agent",
+  "multi-agent": "Multi-Agent",
+  "long-horizon": "Memory/Long-horizon",
+  "安全/对齐": "安全",
+  "污染": "评测污染"
 };
 
-/** 模型漏了分类标签时，按内容类型补一个。 */
+/** 仅在模型漏掉分类标签时兜底；实际分类按材料核心贡献判断。 */
 export const CATEGORY_BY_ITEM_TYPE: Readonly<Record<string, string>> = {
-  model_release: "模型发布", product_launch: "产品更新", tool_or_prompt: "教程/实践", research_paper: "论文/研究",
-  industry_event: "行业动态", opinion_analysis: "大佬观点", tutorial_explainer: "教程/实践",
+  "model_release": "评测结果",
+  "product_launch": "工具框架",
+  "tool_or_prompt": "评测方法",
+  "research_paper": "论文研究",
+  "industry_event": "实践观点",
+  "opinion_analysis": "实践观点",
+  "tutorial_explainer": "实践观点"
 };
 
 // ── 公司与主体 ──────────────────────────────────────────────────────────────────────────

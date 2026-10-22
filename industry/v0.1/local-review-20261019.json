@@ -1,0 +1,167 @@
+[
+  {
+    "url": "https://arxiv.org/abs/2407.01502",
+    "originalTitle": "AI Agents That Matter",
+    "fields": {
+      "tags": [
+        "论文研究",
+        "成本与效率",
+        "可靠性",
+        "评测污染"
+      ]
+    }
+  },
+  {
+    "url": "https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents",
+    "originalTitle": "Demystifying evals for AI agents",
+    "fields": {
+      "tags": [
+        "实践观点",
+        "Code Agent",
+        "Customer Service Agent",
+        "Computer Use",
+        "Research Agent",
+        "可靠性",
+        "Anthropic"
+      ]
+    }
+  },
+  {
+    "url": "https://docs.harborframework.com/core-concepts",
+    "originalTitle": "Core concepts（官方文档快照）",
+    "fields": {
+      "summary": "Harbor 文档将 Task 定义为任务指令、沙箱环境与 Verifier 的组合，Verifier 评估 Agent 的工作并产生奖励。Job 可组合任务、数据集、Agent 与模型，批量运行 Trial；Trajectory 记录执行中的对话与行动，供诊断和调试。这是官方文档快照，首次发布日期未知。",
+      "tags": [
+        "工具框架",
+        "执行轨迹",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://www.anthropic.com/engineering/swe-bench-sonnet",
+    "originalTitle": "Raising the bar on SWE-bench Verified with Claude 3.5 Sonnet",
+    "fields": {
+      "title": "历史结果（2025）：Claude 3.5 Sonnet 在 SWE-bench Verified 上取得 49%",
+      "tags": [
+        "评测结果",
+        "Code Agent",
+        "Tool/API Agent",
+        "结果验证",
+        "Anthropic"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2503.16416",
+    "originalTitle": "Survey on Evaluation of LLM-based Agents",
+    "fields": {
+      "tags": [
+        "论文研究",
+        "Generalist Agent",
+        "工具选择",
+        "安全",
+        "鲁棒性"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2410.10934",
+    "originalTitle": "Agent-as-a-Judge: Evaluate Agents with Agents",
+    "fields": {
+      "tags": [
+        "评测方法",
+        "Code Agent",
+        "执行轨迹",
+        "结果验证",
+        "arXiv"
+      ]
+    }
+  },
+  {
+    "url": "https://www.anthropic.com/engineering/writing-tools-for-agents",
+    "originalTitle": "Writing effective tools for agents — with agents",
+    "fields": {
+      "summary": "Anthropic 介绍以真实多步任务迭代 Agent 工具的流程：先构建原型，再用任务验证器、调用次数、token 消耗和错误记录做程序化评测。文章讨论工具命名空间、操作合并、返回字段精简与描述优化，并展示内部 Slack 工具的留出集评测案例。",
+      "tags": [
+        "实践观点",
+        "Tool/API Agent",
+        "工具选择",
+        "参数调用",
+        "成本与效率",
+        "Anthropic"
+      ]
+    }
+  },
+  {
+    "url": "https://inspect.cyber.aisi.org.uk/",
+    "originalTitle": "Inspect Cyber（官方文档快照）",
+    "fields": {
+      "title": "Inspect Cyber 官方文档：构建与校验网络安全 Agent 评测",
+      "summary": "Inspect Cyber 是英国 AI 安全研究所为 Inspect 开发的扩展，用于构建和运行网络安全 Agent 评测。文档介绍 YAML 任务配置、Docker 与 k8s 等沙箱、评测变体、flag 评分及可解性校验。本条为官方文档快照，首次发布日期未知，未提供实际 Agent 成绩。",
+      "tags": [
+        "工具框架",
+        "安全",
+        "Code Agent",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://www.anthropic.com/engineering/eval-awareness-browsecomp",
+    "originalTitle": "Eval awareness in Claude Opus 4.6’s BrowseComp performance",
+    "fields": {
+      "tags": [
+        "评测结果",
+        "Research Agent",
+        "Browser Agent",
+        "Multi-Agent",
+        "评测污染",
+        "结果验证",
+        "Anthropic"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2601.14691",
+    "originalTitle": "Gaming the Judge: Unfaithful Chain-of-Thought Can Undermine Agent Evaluation",
+    "fields": {
+      "category": "paper",
+      "title": "研究：改写 CoT 可干扰 Agent 轨迹评分",
+      "summary": "作者在 800 条网页任务轨迹上固定动作与观察，仅改写 CoT，发现模型裁判更容易将失败轨迹判为成功。伪造任务进展信号的内容型操纵比仅改变表述的风格型操纵更有效；改进提示词与增加裁判计算可减轻但不能消除这种敏感性。结果为论文作者报告。",
+      "tags": [
+        "论文研究",
+        "Browser Agent",
+        "执行轨迹",
+        "结果验证",
+        "可靠性"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2311.12983",
+    "originalTitle": "GAIA: a benchmark for General AI Assistants",
+    "fields": {
+      "title": "GAIA：评测通用 AI 助手的推理、浏览与工具使用能力",
+      "tags": [
+        "评测基准",
+        "Generalist Agent",
+        "Tool/API Agent",
+        "Browser Agent",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2406.13352",
+    "originalTitle": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+    "fields": {
+      "tags": [
+        "评测基准",
+        "Tool/API Agent",
+        "安全",
+        "鲁棒性"
+      ]
+    }
+  }
+]

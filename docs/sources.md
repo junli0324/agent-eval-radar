@@ -36,6 +36,7 @@
 ```
 
 - `parseMode`：`html`（默认，用选择器）、`markdown`（经 Jina 渲染后按 Markdown 读）、`docusaurus_changelog`。
+- `adapter: "inspect_changelog"`：Inspect 官方 Quarto Changelog 的版本章节；正文按版本分开，链接固定到对应 Git tag，最多取最近 10 版。不适用于普通网页列表。
 - `detail`：列表缺日期、标题或摘要时抓详情页补齐（`publishedAtSelector`、`titleSelector`、`summarySelector` 等）。
 - `allowUrlPrefixes` / `denyUrlPrefixes`：只收某些路径下的文章。
 
@@ -97,3 +98,7 @@ Content-Type: application/json
 - `sourceId` 不存在时会自动建一个 `external` 信源，默认不进公开页面：到后台把它的参与方式改成 `editorial` 才会出现在站上。
 - 在后台暂停信源后，推送接口返回 409，不再接收新文章；恢复信源后可以继续推送。
 - 条目的 `raw._aihot.backfill` 为 `true` 时按历史回灌处理（不进入“今天”、不推送）。
+
+## 可选的词语组合发现筛选
+
+`ingestNoiseFilter.requireAllGroups` 是字符串数组的数组：组内任一词匹配，组间全部满足，大小写不敏感，检查标题与摘要片段。例如 `[["agent"], ["eval", "benchmark"]]` 要求同时出现 Agent 与一种评测线索。该规则先于 `keepIfMatches` 检查，豁免词不能绕过必需组；未配置时保持原行为。它只控制候选发现，不代替模型相关性或精选判断。

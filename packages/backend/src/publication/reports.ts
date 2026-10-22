@@ -6,6 +6,9 @@ import { cached, type Cached } from "../lib/cache.ts";
 import { proxiedImage, proxiedImageSet } from "../media/imgproxy.ts";
 import { dailyUrl, itemUrl, siteUrl } from "./links.ts";
 import { SITE, withSubject } from "@aihot/industry/site";
+import { reportContentSql } from "./report-content.ts";
+import { selectedCondition } from "./items.ts";
+import type { Db } from "../db.ts";
 
 export type { ReportKind };
 
@@ -70,7 +73,7 @@ export async function reportIndexRows(kind: ReportKind, limit: number) {
          FROM jsonb_array_elements(jsonb_path_query_array(content,
            CASE WHEN kind = 'daily' THEN '$.sections[*].items[*]'::jsonpath ELSE '$.themes[*].storyRefs[*]'::jsonpath END
          )) WITH ORDINALITY AS cited(item, ord))))) AS content
-    FROM reports WHERE kind = ${kind} ORDER BY key DESC LIMIT ${limit}`;
+    FROM reports WHERE kind = ${kind} AND ${reportContentSql()} ORDER BY key DESC LIMIT ${limit}`;
 }
 
 /**
@@ -190,13 +193,13 @@ function readingMinutes(text: string): number {
 
 async function neighbors(kind: ReportKind, key: string): Promise<{ prev: string | null; next: string | null }> {
   const [row] = await sql<{ prev: string | null; next: string | null }[]>`
-    SELECT (SELECT key FROM reports WHERE kind = ${kind} AND key < ${key} ORDER BY key DESC LIMIT 1) AS prev,
-      (SELECT key FROM reports WHERE kind = ${kind} AND key > ${key} ORDER BY key ASC LIMIT 1) AS next`;
+    SELECT (SELECT key FROM reports WHERE kind = ${kind} AND key < ${key} AND ${reportContentSql()} ORDER BY key DESC LIMIT 1) AS prev,
+      (SELECT key FROM reports WHERE kind = ${kind} AND key > ${key} AND ${reportContentSql()} ORDER BY key ASC LIMIT 1) AS next`;
   return { prev: row?.prev ?? null, next: row?.next ?? null };
 }
 
 export async function loadReport(kind: ReportKind, key: string): Promise<ReportDetail | null> {
-  const [r] = await sql<ReportRow[]>`SELECT kind, key, window_start, window_end, content, generated_at, revision FROM reports WHERE kind = ${kind} AND key = ${key}`;
+  const [r] = await sql<ReportRow[]>`SELECT kind, key, window_start, window_end, content, generated_at, revision FROM reports WHERE kind = ${kind} AND key = ${key} AND ${reportContentSql()}`;
   if (!r) return null;
   const c = r.content;
   const rawItems: Array<Record<string, any>> = [
@@ -312,8 +315,8 @@ export async function v1Dailies(limit: number) {
 
 export async function v1Daily(date: string | "latest") {
   const [r] = date === "latest"
-    ? await sql<ReportRow[]>`SELECT kind, key, window_start, window_end, content, generated_at, revision FROM reports WHERE kind = 'daily' ORDER BY key DESC LIMIT 1`
-    : await sql<ReportRow[]>`SELECT kind, key, window_start, window_end, content, generated_at, revision FROM reports WHERE kind = 'daily' AND key = ${date}`;
+    ? await sql<ReportRow[]>`SELECT kind, key, window_start, window_end, content, generated_at, revision FROM reports WHERE kind = 'daily' AND ${reportContentSql()} ORDER BY key DESC LIMIT 1`
+    : await sql<ReportRow[]>`SELECT kind, key, window_start, window_end, content, generated_at, revision FROM reports WHERE kind = 'daily' AND key = ${date} AND ${reportContentSql()}`;
   if (!r) return null;
   const c = r.content;
   const raw = [...(c.sections ?? []).flatMap((s: any) => s.items ?? []), ...(c.flashes ?? [])];
@@ -353,6 +356,22 @@ export async function v1Daily(date: string | "latest") {
 }
 
 export { siteUrl };
+
+export interface ArchiveReviewMaterial {
+  itemId: string; title: string; summary: string; category: string | null; score: number | null;
+  sourceName: string; sourceUrl: string; sourceId: string; firstParty: boolean; publishedAt: Date;
+}
+
+/** Explicit archival reading reviews use original publication dates. This does not change the
+ * live composer's arrival/release windows or backfill exclusion, and never changes material flags. */
+export async function loadArchiveReviewMaterials(start: Date, end: Date, now = new Date(), db: Db = sql) {
+  return db<ArchiveReviewMaterial[]>`SELECT p.article_id AS "itemId", p.title, p.summary, p.category, p.score,
+      s.name AS "sourceName", p.url AS "sourceUrl", s.id AS "sourceId", p.first_party AS "firstParty", p.published_at AS "publishedAt"
+    FROM publications p JOIN sources s ON s.id = p.source_id
+    WHERE ${selectedCondition(now)} AND p.eligible AND s.participation_mode = 'editorial'
+      AND p.published_at >= ${start} AND p.published_at < ${end} AND btrim(coalesce(p.summary, '')) <> ''
+    ORDER BY p.score DESC NULLS LAST, p.published_at DESC, p.article_id LIMIT 12`;
+}
 
 export function reportNavigation(kind: ReportKind, index: ReportIndexEntry[], key: string): ReportNavigationEntry[] {
   const at = index.findIndex((e) => e.key === key);

@@ -12,6 +12,7 @@ import { escapeXml } from "../lib/text.ts";
 import { siteUrl } from "./links.ts";
 import { leaderboardUrls } from "../leaderboard/read.ts";
 import { topicPageCounts } from "./topics.ts";
+import { reportContentSql } from "./report-content.ts";
 
 async function leaderboardDetailUrls(): Promise<string[]> {
   const fixed = new Set(["/leaderboard", "/leaderboard/sources", "/leaderboard/rules"]);
@@ -34,7 +35,7 @@ interface Entry {
 async function build(): Promise<string> {
   const entries: Entry[] = [];
   const [latestItem] = await sql<{ t: Date | null }[]>`SELECT max(timeline_at) AS t FROM publications WHERE visibility = 'public' AND selected`;
-  const [latestDaily] = await sql<{ key: string | null; t: Date | null }[]>`SELECT max(key) AS key, max(generated_at) AS t FROM reports WHERE kind = 'daily'`;
+  const [latestDaily] = await sql<{ key: string | null; t: Date | null }[]>`SELECT max(key) AS key, max(generated_at) AS t FROM reports WHERE kind = 'daily' AND ${reportContentSql()}`;
   const now = latestItem?.t ?? new Date();
   entries.push(
     { loc: "/", lastmod: now, changefreq: "hourly", priority: 1 },
@@ -60,7 +61,7 @@ async function build(): Promise<string> {
     for (const board of ["coding", "reasoning", "knowledge", "professional"]) entries.push({ loc: `/leaderboard/category/${board}`, changefreq: "daily", priority: 0.6 });
   }
   if (FEATURES.codexResetMonitor) entries.push({ loc: "/codex-reset", changefreq: "hourly", priority: 0.6 });
-  const reports = await sql<{ kind: string; key: string; generated_at: Date }[]>`SELECT kind, key, generated_at FROM reports ORDER BY kind, key DESC`;
+  const reports = await sql<{ kind: string; key: string; generated_at: Date }[]>`SELECT kind, key, generated_at FROM reports WHERE ${reportContentSql()} ORDER BY kind, key DESC`;
   for (const r of reports) entries.push({ loc: `/${r.kind}/${r.key}`, lastmod: r.generated_at, changefreq: r.kind === "daily" ? "never" : "monthly", priority: r.kind === "daily" ? 0.6 : 0.6 });
   for (const t of await topicPageCounts()) {
     if (!t.indexable) continue;

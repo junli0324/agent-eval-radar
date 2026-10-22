@@ -7,6 +7,7 @@ import { InvalidCursorError } from "@aihot/backend/lib/cursor";
 import { exportMarkdown, loadItemDetail, siteItemDetail } from "@aihot/backend/publication/detail";
 import { loadPool, SearchBusyError } from "@aihot/backend/publication/pool";
 import { loadTimeline } from "@aihot/backend/publication/timeline";
+import { loadContentUpdates } from "@aihot/backend/publication/updates";
 import { loadStoryFollowups } from "@aihot/backend/publication/followups";
 import { loadDevelopments, loadGroupReports } from "@aihot/backend/publication/groups";
 import { loadTopicTags } from "@aihot/backend/publication/topics";
@@ -80,6 +81,15 @@ export async function parseFilters(q: Record<string, string>): Promise<FilterPar
 }
 
 export function registerSite(app: FastifyInstance) {
+  app.get("/api/site/updates", siteHandler(async (req, reply) => {
+    const value = looseQuery(req).since;
+    const since = value ? new Date(value) : null;
+    if (value !== undefined && (!since || !Number.isFinite(+since) || since.toISOString() !== value || +since > Date.now() || +since < 0)) {
+      throw new BadRequest("invalid since timestamp");
+    }
+    return reply.header("Cache-Control", "private, no-store").send(await loadContentUpdates(since));
+  }));
+
   app.get("/api/site/meta", siteHandler(async (req, reply) => {
     return sendJsonWithEtag(req, reply, siteMeta(), { etagPrefix: "meta", cacheControl: "public, max-age=60, s-maxage=60" });
   }));

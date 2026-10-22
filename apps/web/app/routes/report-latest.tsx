@@ -1,5 +1,5 @@
 import { SITE, withSubject } from "@aihot/industry/site";
-import { useLoaderData } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import type { Route } from "./+types/report-latest";
 import type { ReportDetail, ReportNavigationEntry } from "@aihot/contracts/site";
 import { loadOr404 } from "../lib/api.server";
@@ -34,7 +34,7 @@ export default function ReportLatestPage() {
   const { kind, report, index, today } = useLoaderData<typeof loader>();
   return (
     <ReportLayout kind={kind} index={index} current={report?.key ?? null} today={today}>
-      {report ? <ReportPaper report={report} index={index} /> : <EmptyState title={`还没有发布 AI ${KIND_LABEL[kind]}`}>第一期发布后会出现在这里。</EmptyState>}
+      {report ? <ReportPaper report={report} index={index} /> : <EmptyState title={`还没有可阅读的评测${KIND_LABEL[kind]}`} action={<Link to="/all" className="chip">先浏览已收录资料</Link>}>有符合条件的内容后，报告会出现在这里。</EmptyState>}
     </ReportLayout>
   );
 }

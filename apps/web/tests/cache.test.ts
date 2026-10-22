@@ -31,6 +31,10 @@ const api = createServer((req, res) => {
     return res.end(JSON.stringify({ filters, cards: [], nextCursor: null, refreshAt, dayCounts: [], hot: null, generatedAt: "2026-09-28T00:00:00Z" }));
   }
   if (url.pathname === "/api/site/hot") return res.end(JSON.stringify({ entries: [] }));
+  if (url.pathname === "/api/site/topics") return res.end(JSON.stringify({ topics: [
+    { slug: "code-agent", name: "Code Agent", group: "field", definition: "编码 Agent 评测", total: 6 },
+    { slug: "multi-agent", name: "Multi-Agent", group: "field", definition: "协作 Agent 评测", total: 0 },
+  ] }));
   if (url.pathname === "/api/site/echo-client") return res.end(JSON.stringify({ forwarded: req.headers["x-forwarded-for"], real: req.headers["x-real-ip"] }));
   if (url.pathname === "/api/site/items/long-lived") return res.end(JSON.stringify({ id: "long-lived", title: "t" }));
   if (url.pathname === "/api/site/contact") return res.end(JSON.stringify({ wechatQr: "/qr.png", feishuQr: "/qr.png" }));
@@ -74,6 +78,14 @@ after(async () => {
   }
   api.closeAllConnections();
   await new Promise<void>((resolve) => api.close(() => resolve()));
+});
+
+test("topic directory uses industry groups and distinguishes covered from empty topics", async () => {
+  const response = await fetch(`${origin}/topics`);
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  for (const text of ["按主题看评测", "Agent 场景", "情报分类", "研究机构", "待补充精选", '/topics/code-agent', '/topics/multi-agent']) assert.ok(html.includes(text), text);
+  assert.doesNotMatch(html, /按主题看 AI|谁发了什么|38 个方向/);
 });
 
 test("public route subsets produce the same complete navigation data; filters still differ", async () => {

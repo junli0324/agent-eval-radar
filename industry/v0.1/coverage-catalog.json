@@ -1,0 +1,22 @@
+[
+  {"id":"2407.01502","name":"AI Agents That Matter","focus":"成本、准确率、过拟合与可复现性分析","expectedCategory":"paper"},
+  {"id":"demystifying-evals","name":"Demystifying evals for AI agents","url":"https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents","source":"anthropic","kind":"article","focus":"Agent 评测设计、grader 组合与回归实践","expectedCategory":"practice"},
+  {"id":"harbor-docs","name":"Harbor · Core concepts","url":"https://docs.harborframework.com/core-concepts","source":"harbor","kind":"docs","focus":"沙箱任务、验证器与 Agent 评测 Harness","expectedCategory":"tools"},
+  {"id":"sonnet-swe-bench","name":"Raising the bar on SWE-bench Verified with Claude 3.5 Sonnet","url":"https://www.anthropic.com/engineering/swe-bench-sonnet","source":"anthropic","kind":"article","focus":"既有 SWE-bench Verified 上的 Agent scaffold 与历史成绩","expectedCategory":"results"},
+  {"id":"2503.16416","name":"Survey on Evaluation of LLM-based Agents","focus":"Agent 能力、应用场景、基准与工具综述","expectedCategory":"paper"},
+  {"id":"2410.10934","name":"Agent-as-a-Judge: Evaluate Agents with Agents","focus":"对 Agent 任务过程与中间反馈的评判方法","expectedCategory":"methods"},
+  {"id":"writing-tools","name":"Writing effective tools for AI agents—using AI agents","url":"https://www.anthropic.com/engineering/writing-tools-for-agents","source":"anthropic","kind":"article","focus":"通过 Agent 任务评测迭代工具设计","expectedCategory":"practice"},
+  {"id":"inspect-cyber-docs","name":"Inspect Cyber","url":"https://inspect.cyber.aisi.org.uk/","source":"inspect-cyber","kind":"docs","focus":"沙箱网络安全 Agent 的评测工具扩展","expectedCategory":"tools"},
+  {"id":"browsecomp-awareness","name":"Eval awareness in Claude Opus 4.6’s BrowseComp performance","url":"https://www.anthropic.com/engineering/eval-awareness-browsecomp","source":"anthropic","kind":"article","focus":"联网研究评测中的测试识别与答案泄漏案例","expectedCategory":"results"},
+  {"id":"2601.14691","name":"Gaming the Judge: Unfaithful Chain-of-Thought Can Undermine Agent Evaluation","focus":"固定动作与观察下，推理轨迹改写对裁判的影响","expectedCategory":"paper"},
+  {"id":"trajectory-evals","name":"How to evaluate your agent with trajectory evaluations","url":"https://docs.langchain.com/langsmith/trajectory-evals","source":"langchain","kind":"docs","focus":"轨迹匹配、工具调用与 LLM-as-Judge 方法","expectedCategory":"methods"},
+  {"id":"agent-evals-questions","name":"The Most Common Questions About Agent Evals, Answered","url":"https://www.langchain.com/blog/common-questions-about-agent-evals","source":"langchain","kind":"article","focus":"Agent 评测起步、评测层级与实践问题","expectedCategory":"practice"},
+  {"id":"2507.21504","name":"Evaluation and Benchmarking of LLM Agents: A Survey","focus":"评测目标与评测过程的双维分类及企业落地缺口","expectedCategory":"paper"},
+  {"id":"2606.22737","name":"GroundEval: A Deterministic Replacement for LLM-as-Judge in Stateful Agent Evaluation","focus":"以检索、引用、时间与访问权限证据检查 Agent 行为","expectedCategory":"methods"},
+  {"id":"2610.20424","name":"BizBench: Unveiling Hidden Challenges in Deploying Long-Horizon Agents for Real-World Business","focus":"长期业务任务的目标完成与执行约束双重验证","expectedCategory":"benchmarks"},
+  {"id":"2610.21109","name":"Kolab: Benchmarking Human-Agent Collaboration in Long-Horizon Workflows","focus":"真实专业工作流中的人机协作、贡献采纳与质量判断","expectedCategory":"benchmarks"},
+  {"id":"2610.16067","name":"When Agent Evaluation Becomes Unreliable: An Empirical Study of Oracle Failures and Configuration-Dependent Measurement in an LLM Agent Benchmark","focus":"评分器完整性审计、已知答案对照与配置依赖的测量偏差","expectedCategory":"paper"},
+  {"id":"2610.07274","name":"A Trust Layer for Agent Evaluation","focus":"对既有成绩追加轨迹证据、虚假完成声明和重复运行稳定性审计","expectedCategory":"methods"},
+  {"id":"2610.21074","name":"OmicsBench: a long-horizon multi-turn benchmark of AI agents on research-study-scale bioinformatics","focus":"多轮依赖任务、确定性评分与 Agent 失败模式发现","expectedCategory":"benchmarks"},
+  {"id":"unintended-actions","name":"Investigating unintended model actions in our evaluations and internal use","url":"https://www.anthropic.com/research/investigating-unintended-model-actions","source":"anthropic","kind":"article","focus":"真实评测中的越权行动、轨迹审计与环境隔离实践","expectedCategory":"practice"}
+]

@@ -21,6 +21,7 @@ const source = (config: Record<string, unknown>) => ({ id: "test-list", config }
 // map, the route table naming the homepage's chunks, and the chunk with the Blog list among the menu,
 // the model cards, the other sections and a Paper list built at run time.
 const pages: Record<string, (cdn: string) => string> = {
+  "/inspect-changelog": () => '<main><section class="level2" id="october-2026"><h2>0.3.277 (06 October 2026)</h2><ul><li>Fixed scorer treating an empty target as a perfect score.</li></ul></section></main>',
   "/": (cdn) =>
     `<html><head><script defer src="${cdn}static/js/lib-react.a6be410a.js"></script><script defer src="${cdn}static/js/4752.2908c99e.js"></script>` +
     `<script defer src="${cdn}static/js/index.c5195ace.js"></script></head><body><a href="/zh/index">简体中文</a><a href="/mimocode">MiMo Code</a>` +
@@ -141,6 +142,14 @@ test("config entries a source kind does not implement are named, not ignored", (
   );
   assert.deepEqual(unsupportedConfig("rss", { feedUrl: "https://example.org/feed", denyUrlPrefixes: ["https://example.org/business/"] }), []);
   assert.deepEqual(unsupportedConfig("x_search", { query: "from:a", allowUrlPrefixes: ["https://example.org/"] }), ["allowUrlPrefixes"], "X shards apply no URL rules");
+});
+
+test("Inspect web-list adapter collects complete version notes without fetching release pages", async () => {
+  const out = await fetchWebList(source({ url: `${site}/inspect-changelog`, adapter: "inspect_changelog" }));
+  assert.equal(out.length, 1);
+  assert.equal(out[0]!.bodyStatus, "ok");
+  assert.match(out[0]!.bodyText!, /empty target as a perfect score/);
+  assert.equal(out[0]!.url, "https://github.com/UKGovernmentBEIS/inspect_ai/blob/0.3.277/CHANGELOG.md");
 });
 
 test("a listing that links other articles in its teasers takes only the links that begin a line", () => {

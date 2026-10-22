@@ -387,3 +387,13 @@ export interface StoryFollowupsResponse { items: StoryFollowup[]; more: boolean 
 
 /** All issue keys keep numbering and calendars stable; closed daily months omit their titles. */
 export interface ReportNavigationEntry { key: string; title?: string | null; count?: number }
+
+/** Reader notifications count public updates, not raw collection or model activity. */
+export interface ContentUpdates {
+  checkedAt: string;
+  since: string | null;
+  latestAt: string | null;
+  articles: number;
+  reports: number;
+  entries: Array<{ key: string; kind: "article" | ReportKind; title: string; href: string; at: string; selected: boolean }>;
+}

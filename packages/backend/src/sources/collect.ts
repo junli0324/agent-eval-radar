@@ -33,6 +33,9 @@ export function noiseFiltered(c: Candidate, source: SourceRow): boolean {
   const has = (text: string, words: string[] | undefined) => (words ?? []).some((k) => text.includes(k.toLowerCase()));
   const title = c.title.toLowerCase();
   const hay = `${title}\n${(c.excerpt ?? "").toLowerCase()}`;
+  // Every group is required; alternatives within a group are OR. Apply before exemptions so a
+  // keep word cannot admit generic AI news or an old paper's replacement announcement.
+  if (f.requireAllGroups && !f.requireAllGroups.every((words: string[]) => words.length && has(hay, words))) return true;
   if (has(hay, f.keepIfMatches)) return false;
   return has(title, f.dropMarkersTitleOnly) || has(hay, f.dropMarkers);
 }

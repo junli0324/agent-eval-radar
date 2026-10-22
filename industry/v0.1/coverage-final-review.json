@@ -1,0 +1,74 @@
+[
+  {
+    "url": "https://docs.langchain.com/langsmith/trajectory-evals",
+    "analysisHash": "b790588ed46dd6df80dc7f55606154d64eb6a4b2fcf74e93cf9de9eef304dcc0",
+    "fields": {
+      "category": "methods",
+      "tags": [
+        "评测方法",
+        "Tool/API Agent",
+        "执行轨迹",
+        "结果验证"
+      ]
+    }
+  },
+  {
+    "url": "https://www.langchain.com/blog/common-questions-about-agent-evals",
+    "analysisHash": "8d90bd9f4267c6da4322e78b6e71552885dd391ac09abe6822e7f438034b0e25",
+    "fields": {
+      "category": "practice",
+      "tags": [
+        "实践观点",
+        "执行轨迹",
+        "结果验证",
+        "可靠性"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2507.21504",
+    "analysisHash": "e7bdd3ef33bf0389bff8d7523aad242bae5b5fde3e54d8d221cf1e9ce4f998e3",
+    "fields": {
+      "category": "paper",
+      "tags": [
+        "论文研究",
+        "可靠性",
+        "安全",
+        "Memory/Long-horizon"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2606.22737",
+    "analysisHash": "9e842aeb0c000a0b598fb4daa1b85ec35eda22b459fe7d821a76f3279729a5e4",
+    "fields": {
+      "category": "methods",
+      "title": "GroundEval：以确定性检查评估 Agent 的证据路径",
+      "summary": "作者提出 GroundEval，无需 LLM 裁判，按检索、引用、时间边界与访问权限对 Agent 的回答和执行轨迹做确定性检查。作者给出一个案例：两个 LLM 裁判对看似合理的回答给出 0.85 以上评分，但轨迹显示 Agent 未检索所需材料，GroundEval 因而给出 0.000。该案例为作者报告。",
+      "reason": "该框架检查 Agent 的回答是否有有效证据路径，可作为有状态任务中检索、引用与权限评测的方法参考。",
+      "tags": [
+        "评测方法",
+        "结果验证",
+        "执行轨迹",
+        "可靠性"
+      ]
+    }
+  },
+  {
+    "url": "https://arxiv.org/abs/2607.07946",
+    "analysisHash": "7dfced394a75da48f57852d62e221eda2dfd6989b2daaac69a6cceba26f751c0",
+    "fields": {
+      "category": "benchmarks",
+      "title": "DeepSWE：113 项原创长程编码任务与可执行验证器",
+      "summary": "作者报告 DeepSWE 含 113 项原创长程软件工程任务，覆盖 91 个开源仓库和五种语言。任务不回流上游，以降低参考解进入训练数据的风险；手写 verifier 检查所需功能并接受不同的可行实现。论文还用 LLM 裁判交叉复核评分；裁判与验证器的分歧率不等同于真实错误率。",
+      "reason": "该基准提供原创任务、可执行验证器和交叉复核设置，可用于比较编码 Agent 的评分口径与数据泄漏控制方式。",
+      "tags": [
+        "评测基准",
+        "Code Agent",
+        "Memory/Long-horizon",
+        "评测污染",
+        "结果验证"
+      ]
+    }
+  }
+]

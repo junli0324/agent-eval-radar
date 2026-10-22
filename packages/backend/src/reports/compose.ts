@@ -11,6 +11,7 @@ import { sql } from "../db.ts";
 import { chatJson } from "../providers/llm.ts";
 import { completeReceipt } from "../providers/receipts.ts";
 import { shutdownSignal } from "../jobs/queue.ts";
+import { reportContentSql } from "../publication/report-content.ts";
 
 export const REPORT_VERSION = promptVersion("report-daily-lead", "report-period");
 
@@ -154,6 +155,7 @@ export async function composeDaily(date: string, reason = "scheduled"): Promise<
     items: perSection.get(label)!.map(({ category: _c, factKey: _f, ...entry }) => entry),
   }));
   const ordered = sections.flatMap((s) => s.items).sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+  if (!ordered.length) return { key: date, entries: 0 };
   const model = await modelFor("report");
   const lead = ordered.length ? await writeLead("daily", date, ordered, model) : null;
   const content = {
@@ -202,7 +204,8 @@ async function composePeriod(kind: "weekly" | "monthly", key: string, startDate:
   const end = beijingMidnight(addDays(endDateInclusive, 1));
   const all = await candidates(start, end);
   const top = all.slice(0, kind === "weekly" ? 40 : 60);
-  const dailyCount = (await sql<{ n: number }[]>`SELECT count(*) AS n FROM reports WHERE kind = 'daily' AND key >= ${startDate} AND key <= ${endDateInclusive}`)[0]?.n ?? 0;
+  if (!top.length) return { key, entries: 0 };
+  const dailyCount = (await sql<{ n: number }[]>`SELECT count(*) AS n FROM reports WHERE kind = 'daily' AND key >= ${startDate} AND key <= ${endDateInclusive} AND ${reportContentSql()}`)[0]?.n ?? 0;
   let themes: Array<{ heading: string; summary: string; storyRefs: ReportEntry[] }> = [];
   let headline = "";
   let overview = "";
@@ -222,6 +225,8 @@ async function composePeriod(kind: "weekly" | "monthly", key: string, startDate:
       storyRefs: t.refs.map((r) => top[Number(r) - 1]).filter((e): e is Candidate => !!e).map(({ category: _c, factKey: _f, ...e }) => e),
     }));
   }
+  themes = themes.filter(t => t.storyRefs.length);
+  if (!themes.length) throw new Error("Report model returned no valid citations; no report saved");
   const content = {
     kind,
     title: kind === "weekly" ? `${SITE.name} 周报 · ${key}` : `${SITE.name} 月报 · ${key}`,
@@ -262,16 +267,15 @@ export async function catchUpReports(now = new Date(), days = 7): Promise<{ gene
   const generated: string[] = [];
   const today = beijingDate(now);
   const bjHour = Number(new Date(now.getTime() + 8 * 3600000).toISOString().slice(11, 13));
-  const [first] = await sql<{ key: string | null }[]>`SELECT min(key) AS key FROM reports WHERE kind = 'daily'`;
+  const [first] = await sql<{ key: string | null }[]>`SELECT min(key) AS key FROM reports WHERE kind = 'daily' AND ${reportContentSql()}`;
   const latestDue = bjHour >= 8 ? today : addDays(today, -1);
   for (let i = days - 1; i >= 0; i--) {
     if (shutdownSignal.signal.aborted) return { generated }; // the next hourly run continues
     const d = addDays(latestDue, -i);
     if (first?.key && d < first.key) continue;
-    const [exists] = await sql`SELECT 1 FROM reports WHERE kind = 'daily' AND key = ${d}`;
+    const [exists] = await sql`SELECT 1 FROM reports WHERE kind = 'daily' AND key = ${d} AND ${reportContentSql()}`;
     if (!exists) {
-      await composeDaily(d, "catch-up");
-      generated.push(`daily:${d}`);
+      if ((await composeDaily(d, "catch-up")).entries) generated.push(`daily:${d}`);
     }
   }
   // Last complete ISO week (Monday 10:00 onwards).
@@ -279,10 +283,9 @@ export async function catchUpReports(now = new Date(), days = 7): Promise<{ gene
   const lastWeek = isoWeekLabel(addDays(today, -dow - 7));
   const weekDue = dow > 0 || bjHour >= 10;
   if (weekDue) {
-    const [w] = await sql`SELECT 1 FROM reports WHERE kind = 'weekly' AND key = ${lastWeek}`;
+    const [w] = await sql`SELECT 1 FROM reports WHERE kind = 'weekly' AND key = ${lastWeek} AND ${reportContentSql()}`;
     if (!w) {
-      await composeWeekly(lastWeek, "catch-up");
-      generated.push(`weekly:${lastWeek}`);
+      if ((await composeWeekly(lastWeek, "catch-up")).entries) generated.push(`weekly:${lastWeek}`);
     }
   }
   // Last complete month (1st 10:30 onwards).
@@ -290,10 +293,9 @@ export async function catchUpReports(now = new Date(), days = 7): Promise<{ gene
   const prevMonth = mo === 1 ? `${y - 1}-12` : `${y}-${String(mo - 1).padStart(2, "0")}`;
   const monthDue = dd > 1 || bjHour > 10 || (bjHour === 10 && Number(new Date(now.getTime() + 8 * 3600000).toISOString().slice(14, 16)) >= 30);
   if (monthDue) {
-    const [m] = await sql`SELECT 1 FROM reports WHERE kind = 'monthly' AND key = ${prevMonth}`;
+    const [m] = await sql`SELECT 1 FROM reports WHERE kind = 'monthly' AND key = ${prevMonth} AND ${reportContentSql()}`;
     if (!m) {
-      await composeMonthly(prevMonth, "catch-up");
-      generated.push(`monthly:${prevMonth}`);
+      if ((await composeMonthly(prevMonth, "catch-up")).entries) generated.push(`monthly:${prevMonth}`);
     }
   }
   return { generated };
