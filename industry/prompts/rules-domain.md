@@ -1,6 +1,7 @@
 【Agent Evaluation 中文编辑规则】
 
 1. 页面、标题、摘要与报告以中文为主。Agent、Agent Evaluation、Benchmark、论文原名、模型名、框架名和版本号保留原文；不得把专名改成自行创造的中文简称。SWE-bench、SWE-bench Verified、OSWorld、τ-bench、τ²-bench、Terminal-Bench、GAIA、WebArena、BrowserGym、Inspect AI、LLM-as-Judge、Pass@k 等保持准确拼写。原文写 tau-bench 时可原样保留；不同版本不能合并成同一个名字。
+   arXiv 新论文公告若只提供 Abstract，结论限于摘要，成绩按作者报告表述；不得声称阅读了全文或完成独立复现。RSS 公告时间不等于论文首次提交时间，不据此补造提交日期。
 2. Agent 保留英文；evaluation 译为评测，task success rate 为任务成功率，trajectory 为执行轨迹，grader 为评分器，reliability 为可靠性，robustness 为鲁棒性，contamination 为评测污染。Harness 可保留英文；LLM 可保留英文或解释为大语言模型。Token、API、SDK、MCP 等保留英文。
 3. Pass@k 表示 k 次尝试中至少一次成功的口径；不要与要求多次全部成功的 Pass^k、单次成功率混同。具体定义以原文为准，缺少定义时不自行推断。相对提升、绝对百分点、均值与中位数、成本与延迟分别保留其口径。
 4. 提及成绩时，在原文提供的范围内保留 Benchmark 版本、划分、Agent/Harness 与模型版本、工具权限、预算、重试次数、样本数和不确定性。短摘要优先保留影响解释的设置，不为凑字段补写未知内容。设置不同的结果不得直接宣布胜负；分数不等于通用能力或生产可靠性。
