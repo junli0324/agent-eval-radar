@@ -27,6 +27,23 @@ async function reader(stars: unknown[] = []) {
 const invalidDates = ["not-a-date", "", "999999-01-01", "+275760-09-13T00:00:00.000Z", null, 42, {}];
 const displayDate = (value: string) => `${beijingDate(value)} ${beijingTime(value)}`;
 
+test("content update watermark persists across visits and cannot move backwards or accept corrupt dates", async () => {
+  const { state, values } = await reader();
+  assert.equal(state.getContentUpdatesSeen(), null);
+  const first = new Date(Date.now() - 60_000).toISOString();
+  const next = new Date(Date.now() - 30_000).toISOString();
+  assert.equal(state.setContentUpdatesSeen(first), true);
+  assert.equal(state.getContentUpdatesSeen(), first);
+  assert.equal(state.setContentUpdatesSeen(next), true);
+  state.setContentUpdatesSeen(first);
+  assert.equal(state.getContentUpdatesSeen(), next);
+  assert.equal(state.setContentUpdatesSeen('broken'), false);
+  values.set(state.KEYS.contentUpdatesSeen, '2099-01-01T00:00:00.000Z');
+  assert.equal(state.getContentUpdatesSeen(), null);
+  values.set(state.KEYS.contentUpdatesSeen, 'malformed');
+  assert.equal(state.getContentUpdatesSeen(), null);
+});
+
 test("import normalizes invalid bookmark dates before persisting without dropping bookmarks", async () => {
   const { state, values } = await reader();
   const before = Date.now();
