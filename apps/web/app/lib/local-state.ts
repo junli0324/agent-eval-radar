@@ -9,6 +9,7 @@ export const KEYS = {
   theme: "aihot-theme",
   changelogSeen: "aihot-changelog-seen-version",
   feedbackDraft: "aihot-feedback-draft-v1",
+  contentUpdatesSeen: "agent-eval-radar-content-updates-seen-v1",
 } as const;
 
 export const STARRED_LIMIT = 500;
@@ -54,6 +55,22 @@ function writeRaw(key: string, value: string | null, kind: "local" | "session" =
   } catch {
     return false;
   }
+}
+
+/** A server timestamp, scoped to this browser. Invalid/future values establish a fresh baseline. */
+export function getContentUpdatesSeen(): string | null {
+  const value = readRaw(KEYS.contentUpdatesSeen);
+  if (!value) return null;
+  const at = Date.parse(value);
+  return Number.isFinite(at) && at >= 0 && at <= Date.now() && new Date(at).toISOString() === value ? value : null;
+}
+
+export function setContentUpdatesSeen(value: string): boolean {
+  const at = Date.parse(value);
+  if (!Number.isFinite(at) || at < 0 || at > Date.now() || new Date(at).toISOString() !== value) return false;
+  const previous = getContentUpdatesSeen();
+  if (previous && previous > value) return true;
+  return writeRaw(KEYS.contentUpdatesSeen, value);
 }
 
 // --- change notification (same tab via events, other tabs via the storage event) ---
