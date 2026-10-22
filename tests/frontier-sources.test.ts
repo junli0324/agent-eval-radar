@@ -8,7 +8,7 @@ import { fetchRss } from "@aihot/backend/sources/rss";
 import { fromHtml, allowed } from "@aihot/backend/sources/web-list";
 import { unsupportedConfig } from "@aihot/backend/sources/config-keys";
 import { config } from "@aihot/backend/config";
-import type { Candidate, SourceRow } from "@aihot/backend/sources/types";
+import type { Candidate } from "@aihot/backend/sources/types";
 
 const papers = FRONTIER_SOURCES[0]!;
 const c = (title: string, excerpt = ""): Candidate => ({ url: "https://example.org/article", title, excerpt });
@@ -63,6 +63,6 @@ test("engineering cards use the dated title link and independent practice filter
     assert.equal(noiseFiltered(c("GPU financing news"), source), true);
     assert.equal(noiseFiltered(c("A better speech recognition benchmark"), source), true);
   }
-  const legacy = { config: { ingestNoiseFilter: { dropMarkers: ["hardware"], keepIfMatches: ["agent"] } } } as SourceRow;
+  const legacy = { ...papers, config: { ingestNoiseFilter: { dropMarkers: ["hardware"], keepIfMatches: ["agent"] } } };
   assert.equal(noiseFiltered(c("Agent hardware"), legacy), false, "old exemption behavior remains compatible");
 });
