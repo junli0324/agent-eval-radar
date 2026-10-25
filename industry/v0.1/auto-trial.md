@@ -38,6 +38,8 @@ docker compose logs --tail=30 worker
 
 状态查询还输出 `sourceHealth`、`missingSources` 和 `pipeline`，可区分 HTTP 304、无新增、被拦截与正文未就绪；详见[诊断说明](frontier-sources.md#直接看原因)。状态输出试运行截止时间、滚动 24 小时实际请求次数、试运行回执 token、未知费用回执数和最后一轮结果。`modelCalls: 0` 仅表示这条状态查询本身不调用模型，不表示后台没有费用。账单以 DeepSeek 为准。关闭 PowerShell 不影响后台容器；睡眠、关机或代理断开会影响连续运行。非正常退出最多重启三次；到期正常退出不重启。
 
+到期后先做[只读复盘](trial-review.md)，核对退出状态、实际请求尝试（含重试）、报告与提供商账单。保存的 `state: active` 不代表时间窗口仍有效，以 `active` 和 `expiresAt` 为准。到期不会自动恢复更高的旧预算，也不授权下一轮。
+
 ## 停止与恢复预算
 
 ```powershell

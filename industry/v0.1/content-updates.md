@@ -19,10 +19,19 @@ docker compose stop worker
 git -c http.proxy=http://127.0.0.1:7897 -c http.version=HTTP/1.1 pull --ff-only origin feat/agent-eval-v0.1
 docker compose build api
 docker compose up -d --no-deps api web
-docker compose -f docker-compose.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts status
 ```
 
 在浏览器重新加载网站，顶部出现「内容更新」栏。首次进入点击展开即可看到最近公开的文章与报告。安全阀、试运行到期时间、请求预算、原有数据与评分门槛保持不变。
+
+更新栏验收无需启动 worker。先检查状态中的 `trial.active` 和 `expiresAt`：已到期时保持 worker 停止，不执行 `prepare` 或恢复预算来续期。只有原授权窗口仍有效、且需要继续自动处理时，才按[受限运行文档](auto-trial.md)使用双 Compose 文件恢复 worker。到期后可运行[只读复盘](trial-review.md)，无需模型费用。
+
+可用以下命令分别确认接口与网页源码已更新；浏览器中再展开列表，检查文章和报告跳转、手动检查按钮。首次访问显示零条未查看是正常基线行为。
+
+```powershell
+Invoke-RestMethod http://localhost:3000/api/site/updates | Select-Object checkedAt, latestAt, articles, reports
+(Invoke-WebRequest http://localhost:3000 -UseBasicParsing).Content.Contains('内容更新')
+```
 
 ## 实现与验证
 
