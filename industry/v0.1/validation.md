@@ -1,5 +1,16 @@
 # AgentEval Radar v0.1 验证记录
 
+## 2026-10-25 到期复盘与 Windows 检查
+
+- 核对现有工作区与远端开发分支均为 `7bcbcbb`，PR #1 为 open / draft，未合并 main；该提交的两个 [Check](https://github.com/junli0324/agent-eval-radar/actions/runs/39786398861) / [PR Check](https://github.com/junli0324/agent-eval-radar/actions/runs/39786390385) 均成功。本轮新增提交的远端 CI 需另查，不能沿用旧结果。
+- 用户确认已重建并看到更新栏；Docker 就绪后，实际检查首页 HTML 含「内容更新」，更新接口正常返回近期标题。首次查询计数为零是基线行为，不能据此判断没有内容。
+- 实际检查受限 worker 的启动命令来自双 Compose 配置，已记录 `trial-ended` 并正常退出。到期诊断通过数据库只读事务运行，不续期、不恢复旧预算、不启动普通 worker、不调用真实模型。费用仍需提供商账单核对。
+- 新增 `trial-review.ts` 及数据库回归，验证请求尝试与逻辑回执、重试、截止边界、未知费用、分币种及实际/估算费用、发布门控、补录和空报告。新工具在本地真实库执行只读复盘成功；真实回执、内容抽检与状态快照仅保存在被忽略的 `.data/`。
+- Windows Node 24.17 原生启动 Web 时发现绝对磁盘路径不能直接用于 ESM 动态 import；最小修复为 `pathToFileURL`。既有真实 Web 服务/缓存测试覆盖此启动路径。
+- 本轮 typecheck、Web production build 和 19 项 Web 测试通过。221 项后端测试在独立 Linux 容器和全新 PostgreSQL `*_ci` 库全部通过，模型使用测试自带的本地替身，无真实密钥；Windows 的 SIGTERM 测试不适用于该平台的信号语义，完整后端验证使用与 CI 一致的 Linux 环境。
+- 独立 Docker 镜像与 Compose 项目验证通过：四服务运行、12 个信源种子、整站 smoke、MCP 契约检查、无试运行配置时受限 worker 正常退出，以及新复盘 CLI 的 not-prepared 返回。测试端口 3300、独立数据库卷，与用户原 3000 站点分离。
+- 保持现有评分门槛、热点证据规则、信源、付费预算与原试运行截止时间。未增加迁移，未向用户数据库写入或发布修订。工程检查不代表人工 gold set 或报告事实质量验收完成；后续顺序见 [只读复盘](trial-review.md)。
+
 ## 原版基线
 
 - 上游：`KKKKhazix/AIHOT`，读取版本 `cf8f8d07d68dfa9079becc72b0717a45b33485f3`。
