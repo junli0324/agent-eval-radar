@@ -20,6 +20,7 @@ export const TRIAL_KEY = "agent-eval.auto-trial";
 export const TRIAL_LOCK = "agent-eval-auto-trial";
 export const TRIAL_HOURS = 72;
 export const TRIAL_DAY_CALLS = 100;
+export const TRIAL_ARTICLES_PER_TICK = 3;
 interface Budget { per_minute: number; per_hour: number; per_day: number }
 interface Trial {
   version: 1; state: "active" | "stopped"; startedAt: string; expiresAt: string;
@@ -159,6 +160,13 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
   const ops = { ...productionOps, ...options.operations };
   const counts = { collected: 0, found: 0, created: 0, revised: 0, analyzed: 0, published: 0, grouped: 0, digests: 0 };
   const errors: Array<{ step: string; id: string; reason: string }> = [];
+  const [previous] = await sql`SELECT value FROM settings WHERE key = ${TRIAL_KEY + '.last-tick'}`;
+  let modelRetryAt: string | null = typeof previous?.value?.modelRetryAt === 'string'
+    && Date.parse(previous.value.modelRetryAt) > +now ? previous.value.modelRetryAt : null;
+  let reportCheck = previous?.value.reportCheck ?? null;
+  const waitForBudget = (error: BudgetExceededError) => {
+    modelRetryAt = new Date(+(options.now ?? new Date()) + Math.max(1, error.retryAfterSeconds) * 1000).toISOString();
+  };
   const sources = await sql`SELECT id, next_fetch_at FROM sources WHERE id IN ${sql(RECENT_SOURCES)} AND enabled
     AND participation_mode = 'editorial' AND kind IN ('rss', 'web_list') AND NOT site_fulltext AND NOT syndicate_fulltext`;
   for (const s of sources) {
@@ -172,8 +180,23 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
     }
     catch { errors.push({ step: "collect", id: s.id, reason: "Source collection failed; normal backoff applies" }); }
   }
+  // Due reports get the shared budget before new article work or optional story digests.
+  if (options.maintenance && canWork(t)) {
+    if (modelRetryAt) reportCheck = { at: now.toISOString(), status: 'budget-waiting', generated: [] };
+    else {
+      await assertBudget(t!);
+      try {
+        const reports = await ops.reports(now);
+        reportCheck = { at: now.toISOString(), status: 'checked', generated: reports.generated };
+      } catch (error) {
+        if (error instanceof BudgetExceededError) waitForBudget(error);
+        reportCheck = { at: now.toISOString(), status: modelRetryAt ? 'budget-waiting' : 'failed', generated: [] };
+        errors.push({ step: 'reports', id: 'due', reason: modelRetryAt ? 'Report generation waits for shared budget recovery' : 'Report generation waits for retry' });
+      }
+    }
+  }
   const ids = sources.map(s => s.id);
-  if (ids.length) {
+  if (ids.length && !modelRetryAt) {
     const cutoff = new Date(+now - RECENT_DAYS * 86400000);
     const rows = await sql`SELECT a.id FROM articles a
       LEFT JOIN LATERAL (SELECT id, input_revision, relevance FROM analyses WHERE article_id = a.id ORDER BY input_revision DESC, id DESC LIMIT 1) n ON true
@@ -183,7 +206,7 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
       AND (a.processing_retry_at IS NULL OR a.processing_retry_at <= ${now})
       AND (n.input_revision IS DISTINCT FROM a.revision OR p.article_id IS NULL OR p.analysis_id IS DISTINCT FROM n.id
         OR (n.relevance = 'pass' AND a.grouped_at IS NULL AND p.visibility = 'public'))
-      ORDER BY a.published_at DESC, a.id LIMIT 30`;
+      ORDER BY a.published_at DESC, a.id LIMIT ${TRIAL_ARTICLES_PER_TICK}`;
     for (const row of rows) {
       if (!canWork(t)) return { status: "ended", counts };
       await assertBudget(t!);
@@ -209,34 +232,35 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
         if (!canWork(t)) return { status: "ended", counts };
         const published = await ops.publish(row.id);
         if (published?.changed) counts.published++;
-        if (n.relevance === 'pass' && published?.visibility === 'public' && !a.grouped_at) { await ops.group(row.id); counts.grouped++; }
+        if (n.relevance === 'pass' && published?.visibility === 'public' && !a.grouped_at && canWork(t)) { await ops.group(row.id); counts.grouped++; }
       } catch (error) {
         if (shutdownSignal.signal.aborted) return { status: "ended", counts };
-        if (error instanceof BudgetExceededError) { errors.push({ step: "budget", id: row.id, reason: "Model request limit reached; work waits for budget recovery" }); break; }
+        if (error instanceof BudgetExceededError) { waitForBudget(error); errors.push({ step: "budget", id: row.id, reason: "Model request limit reached; work waits for budget recovery" }); break; }
         await sql`UPDATE articles SET processing_retry_at = ${new Date(+now + 6 * 3600000)} WHERE id = ${row.id}`;
         errors.push({ step: "article", id: row.id, reason: "Body, analysis, publication or grouping incomplete; retry after six hours" });
       }
     }
-    if (canWork(t)) {
+    if (canWork(t) && !modelRetryAt) {
       const stories = await sql`SELECT DISTINCT p.story_id FROM publications p JOIN articles a ON a.id = p.article_id
         JOIN stories st ON st.id = p.story_id AND st.merged_into IS NULL
         WHERE a.source_id IN ${sql(ids)} AND NOT a.backfill AND a.published_at >= ${cutoff} AND p.visibility = 'public' AND p.eligible
           AND (st.digest_updated_at IS NULL OR p.updated_at > st.digest_updated_at)
-          AND (NOT p.selected OR p.visible_after <= ${now}) ORDER BY p.story_id LIMIT 20`;
+          AND (NOT p.selected OR p.visible_after <= ${now}) ORDER BY p.story_id LIMIT 3`;
       for (const s of stories) {
         if (!canWork(t)) break;
         await assertBudget(t!);
         try { if ((await ops.digest(s.story_id)).updated) counts.digests++; }
-        catch (error) { errors.push({ step: "digest", id: String(s.story_id), reason: error instanceof BudgetExceededError ? "Model request limit reached" : "Digest waits for retry" }); break; }
+        catch (error) {
+          if (error instanceof BudgetExceededError) waitForBudget(error);
+          errors.push({ step: "digest", id: String(s.story_id), reason: error instanceof BudgetExceededError ? "Model request limit reached" : "Digest waits for retry" }); break;
+        }
       }
     }
   }
   if (options.maintenance && canWork(t)) {
-    await assertBudget(t!);
-    try { await ops.reports(now); } catch { errors.push({ step: "reports", id: "due", reason: "Report generation waits for retry" }); }
     await ops.hot(now);
   }
-  const result = { status: "ok", at: now.toISOString(), counts, errors };
+  const result = { status: modelRetryAt ? "budget-waiting" : "ok", at: now.toISOString(), counts, errors, modelRetryAt, reportCheck };
   await sql`INSERT INTO settings (key, value, updated_by) VALUES (${TRIAL_KEY + '.last-tick'}, ${sql.json(result as never)}, 'local-auto-trial')
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`;
   return result;
