@@ -249,6 +249,7 @@ CI 会执行类型检查、后端测试、Web 构建与测试、站点 smoke / M
 | [站内内容更新提示](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/content-updates.md) | 未查看数量、文章与报告直达、浏览器查看记录 |
 | [三天受限自动运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/auto-trial.md) | 启动、状态、停止、预算与运行边界 |
 | [到期后的只读复盘](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/trial-review.md) | 实际请求、未知费用、公开内容与报告诊断；不续期、不调用模型 |
+| [第一批可靠性改进](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/reliability-update.md) | 完整摘要、离线回放、报告优先、额度退避与后台只读状态 |
 | [试用资料库](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/trial-library.md) / [分类覆盖补充](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/coverage-trial.md) | 建立可浏览的历史资料库 |
 | [近期内容试运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/recent-trial.md) | 显式控制采集、提取、分析与发布 |
 | [Topic 与阅读入口](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/topics-reading-update.md) / [报告与资料回顾](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/reports-reading-update.md) | 理解页面展示与历史补录 |
