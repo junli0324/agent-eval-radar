@@ -12,7 +12,7 @@ import { upsertMaterial } from "@aihot/backend/content/materials";
 import { analyzeArticle, SCORE_SYSTEM, tierThreshold } from "@aihot/backend/editorial/analyze";
 import { queueProcessing } from "@aihot/backend/jobs/content";
 import { QUEUES, stopBoss } from "@aihot/backend/jobs/queue";
-import { compactAnswerFirstSummary, enforceIdentity, parseTranslateOutput, PREFILTER_SYSTEM } from "@aihot/backend/editorial/writing";
+import { finalizeCopy, enforceIdentity, parseTranslateOutput, PREFILTER_SYSTEM } from "@aihot/backend/editorial/writing";
 import { promptText } from "@aihot/backend/editorial/prompts";
 import { SITE } from "@aihot/industry/site";
 
@@ -174,15 +174,19 @@ test("a short post in Chinese is its own copy; a content-filter refusal is trans
   assert.deepEqual(calls("SENSITIVE").filter((s) => s === "understand" || s === "summarize"), ["understand", "summarize"]);
 });
 
-test("guards: a company the input does not name is not written in; long summaries are cut at sentences", () => {
+test("guards: unsupported identities are rejected while complete evidence and trailing caveats survive", () => {
   const input = { title: "某实验室发布新模型", text: "某实验室发布了一个新模型，参数规模和价格都有说明。", sourceKind: "rss" };
   const guarded = enforceIdentity(input, { titleZh: "OpenAI 发布新模型", summaryZh: "某实验室发布新模型。" });
   assert.deepEqual([guarded.titleZh, guarded.summaryZh, guarded.identityGuard.outcome], ["某实验室发布新模型", "某实验室发布新模型。", "fallback"]);
   // The identity lexicon: a Chinese rendering of a company the input names in English is no invention.
   const alibaba = { title: "Alibaba ships a new coding model", text: "Alibaba released a coding model with pricing details.", sourceKind: "rss" };
   assert.equal(enforceIdentity(alibaba, { titleZh: "阿里巴巴发布编程模型", summaryZh: "阿里巴巴发布了编程模型并公布价格。" }).identityGuard.outcome, "pass");
-  const long = "第一句交代了谁做了什么以及关键结果，这一句本身已经足够说明核心事件的来龙去脉。".repeat(3) + "第二句补充数字。".repeat(20);
-  assert.ok(compactAnswerFirstSummary(long).length <= 190);
+  const evidence = '基准分别评测 Agent 与世界模型，覆盖 1,088 个条目和 400 个案例。'.repeat(3)
+    + '\nAgent Index 为 31.3，WM Overall 为 21.7，任务与指标不同不可直接比较。150 例耦合试点零任务成功。';
+  const complete = finalizeCopy(input, { titleZh: '评测基准', summaryZh: evidence }).summaryZh;
+  assert.equal(complete, evidence.replace('\n', ' '));
+  assert.match(complete, /不可直接比较。150 例耦合试点零任务成功。$/);
+  assert.equal(finalizeCopy(input, { titleZh: 'OpenAI 发布', summaryZh: 'OpenAI 的结果。' }).summaryZh, '', 'identity guard still applies');
   assert.deepEqual(parseTranslateOutput("title_zh: 标题\nsummary_zh: 第一句。\n第二句。"), { titleZh: "标题", summaryZh: "第一句。\n第二句。", bodyZh: "" });
   assert.equal(parseTranslateOutput("title_zh: 标题\nbody_zh: 我们懂你。\n\n来源：X：PixVerse (@PixVerse)").bodyZh, "我们懂你。", "a repeated prompt line is dropped");
 });
