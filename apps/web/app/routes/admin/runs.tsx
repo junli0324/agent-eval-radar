@@ -7,9 +7,12 @@ import { adminGet } from "../../lib/admin.server";
 import { useAdminAction } from "../../features/admin/action";
 import { ago, bj, duration, num } from "../../features/admin/format";
 import { AdminPage, Badge, Button, Card, DataTable, Dot, Empty, Field, Json, ReasonDialog, Select, Stat, Time } from "../../features/admin/ui";
+import type { AutomationOverview } from '@aihot/industry/automation';
+import { AutomationStatus, AUTOMATION_LABELS, automationTone } from '../../features/admin/AutomationStatus';
 
 type Row = Record<string, any>;
 interface Runs {
+  automation: AutomationOverview | null;
   checkedAt: string;
   processes: Array<{ role: string; pid: number; host: string; release: string; startedAt: string; at: string; alive: boolean }>;
   jobs: Row[];
@@ -60,16 +63,20 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
   return (
     <AdminPage title="运行" subtitle={<>任务、队列、信源延迟与需要人工核对的回执和投递。每 20 秒自动刷新 · 最近检查 {bj(r.checkedAt)}</>}>
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Stat
+        {r.automation ? <Stat label="受限自动运行" value={<span className="text-[18px]">{AUTOMATION_LABELS[r.automation.state]}</span>}
+          tone={automationTone(r.automation.state) === 'bad' ? 'bad' : automationTone(r.automation.state) === 'warn' ? 'warn' : undefined}
+          hint={`授权截止 ${bj(r.automation.expiresAt)}`} /> : <Stat
           label="worker"
           value={<span className="inline-flex items-center gap-2 text-[18px]"><Dot tone={worker?.alive ? "ok" : "bad"} />{worker ? (worker.alive ? "运行中" : "心跳中断") : "无心跳"}</span>}
           hint={worker ? `${worker.host} · 心跳 ${ago(worker.at)}` : "worker 未上报心跳"}
-        />
-        <Stat label="队列积压" value={num(queued)} tone={queued > 500 ? "warn" : undefined} hint="排队与等待重试" />
+        />}
+        <Stat label={r.automation ? '普通队列积压' : '队列积压'} value={num(queued)} tone={queued > 500 ? "warn" : undefined} hint={r.automation ? '受限入口不消费此队列' : '排队与等待重试'} />
         <Stat label="失败的定时任务" value={num(failing.length)} tone={failing.length ? "bad" : "ok"} hint="最近一次运行失败" />
         <Stat label="回执结果未知" value={num(r.receipts.issues.filter((x) => x.status === "unknown").length)} tone={r.receipts.issues.some((x) => x.status === "unknown") ? "bad" : "ok"} hint={`7 天 ${num(Object.values(r.receipts.counts).reduce((a, b) => a + b, 0))} 次付费请求`} />
         <Stat label="投递待核实" value={num(r.deliveries.filter((d) => d.status === "unknown").length)} tone={r.deliveries.some((d) => d.status === "unknown") ? "bad" : "ok"} />
       </div>
+
+      {r.automation && <AutomationStatus value={r.automation} />}
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Card title="队列" pad={false}>

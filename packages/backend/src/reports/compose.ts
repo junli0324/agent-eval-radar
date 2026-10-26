@@ -134,13 +134,18 @@ async function saveReport(kind: "daily" | "weekly" | "monthly", key: string, sta
   });
 }
 
-/** Daily report for Beijing date D covers [D-1 08:00, D 08:00) Beijing time. */
-export async function composeDaily(date: string, reason = "scheduled"): Promise<{ key: string; entries: number }> {
+/** Read-only report preparation, also used by the admin diagnosis. No model call or report write. */
+export async function previewDaily(date: string) {
   const end = new Date(beijingMidnight(date).getTime() + 8 * 3600 * 1000);
   const start = new Date(end.getTime() - 86400000);
   const covered = await recentlyCovered("daily", date);
   const all = await candidates(start, end);
-  const fresh = all.filter((c) => !covered.has(c.factKey) && !covered.has(`a:${c.itemId}`));
+  return { start, end, totalCandidates: all.length, entries: all.filter((c) => !covered.has(c.factKey) && !covered.has(`a:${c.itemId}`)) };
+}
+
+/** Daily report for Beijing date D covers [D-1 08:00, D 08:00) Beijing time. */
+export async function composeDaily(date: string, reason = "scheduled"): Promise<{ key: string; entries: number }> {
+  const { start, end, totalCandidates, entries: fresh } = await previewDaily(date);
   const perSection = new Map<string, Candidate[]>();
   const flashes: Array<{ itemId: string; title: string; sourceName: string; sourceUrl: string; publishedAt: string }> = [];
   for (const c of fresh) {
@@ -172,7 +177,7 @@ export async function composeDaily(date: string, reason = "scheduled"): Promise<
     },
     windowStart: start.toISOString(),
     windowEnd: end.toISOString(),
-    generator: { version: REPORT_VERSION, model, repeatsSuppressed: all.length - fresh.length },
+    generator: { version: REPORT_VERSION, model, repeatsSuppressed: totalCandidates - fresh.length },
   };
   await saveReport("daily", date, start, end, content, reason, model);
   if (lead) await completeReceipt(sql, lead.receiptId);
