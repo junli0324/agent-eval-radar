@@ -62,7 +62,12 @@ jobs:
           MODEL_CALLS_ENABLED: "false"
         run: |
           node apps/api/src/main.ts > "$RUNNER_TEMP/api.log" 2>&1 &
+          api_pid=$!
           (cd apps/web && NODE_ENV=production exec node server.ts) > "$RUNNER_TEMP/web.log" 2>&1 &
+          web_pid=$!
+          # End both servers before backend tests fingerprint the entire database: no heartbeat writes.
+          cleanup() { kill "$api_pid" "$web_pid" 2>/dev/null || true; wait "$api_pid" "$web_pid" 2>/dev/null || true; }
+          trap cleanup EXIT
           for i in $(seq 1 60); do curl -fsS -o /dev/null http://127.0.0.1:3000/api/health 2>/dev/null && break; sleep 1; done
           node scripts/smoke.ts --base http://127.0.0.1:3000
           node scripts/mcp-check.ts http://127.0.0.1:3000/api/mcp
