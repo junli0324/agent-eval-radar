@@ -54,10 +54,11 @@ export async function candidates(start: Date, end: Date): Promise<Candidate[]> {
     await tx`SELECT pg_advisory_xact_lock(hashtext('report_candidates'))`;
     return tx<{
       id: string; title: string; summary: string | null; url: string; category: string | null; score: number | null; first_party: boolean;
-      source_id: string; source_name: string; source_kind: string; fact_public_id: string | null; story_public_id: string | null; at: Date; backfill: boolean;
+      source_id: string; source_name: string; source_kind: string; fact_public_id: string | null; story_public_id: string | null; published_at: Date; backfill: boolean;
     }[]>`
       SELECT p.article_id AS id, p.title, p.summary, p.url, p.category, p.score, p.first_party, s.id AS source_id, s.name AS source_name,
-             s.kind AS source_kind, f.public_id AS fact_public_id, st.public_id::text AS story_public_id, p.timeline_at AS at, p.backfill
+             s.kind AS source_kind, f.public_id AS fact_public_id, st.public_id::text AS story_public_id,
+             coalesce(p.published_at,p.discovered_at) AS published_at, p.backfill
       FROM publications p JOIN sources s ON s.id = p.source_id
       LEFT JOIN facts f ON f.id = p.fact_id LEFT JOIN stories st ON st.id = f.story_id
       -- Attribute each item by the later of arrival and release; either range can use its index.
@@ -74,7 +75,7 @@ export async function candidates(start: Date, end: Date): Promise<Candidate[]> {
     const c: Candidate = {
       itemId: r.id, factId: r.fact_public_id, storyPublicId: r.story_public_id, title: r.title, summary: r.summary ?? "",
       sourceName: r.source_name, sourceUrl: r.url, sourceId: r.source_id, firstParty: r.first_party, role: roleOf(r.source_kind, r.first_party),
-      score: r.score === null ? null : Number(r.score), publishedAt: r.at.toISOString(), category: r.category, factKey: key,
+      score: r.score === null ? null : Number(r.score), publishedAt: r.published_at.toISOString(), category: r.category, factKey: key,
     };
     const prev = byFact.get(key);
     if (!prev || Number(c.firstParty) - Number(prev.firstParty) > 0 || (c.firstParty === prev.firstParty && (c.score ?? 0) > (prev.score ?? 0))) byFact.set(key, c);

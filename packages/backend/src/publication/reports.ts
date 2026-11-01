@@ -348,7 +348,8 @@ export async function v1Daily(date: string | "latest") {
         title: String(i.title),
         source: { name: String(i.sourceName ?? "") },
         links: links(i),
-        publishedAt: new Date(i.publishedAt ?? r.generated_at).toISOString(),
+        // Legacy reports stored arrival time here; prefer the shared source-date projection.
+        publishedAt: avail.get(i.itemId)?.publishedAt?.toISOString() ?? new Date(i.publishedAt ?? r.generated_at).toISOString(),
         attribution: attribution(i.itemId ? itemUrl(i.itemId) : url),
       })),
     },

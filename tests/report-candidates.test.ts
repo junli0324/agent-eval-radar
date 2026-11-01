@@ -8,6 +8,7 @@ import { upsertMaterial } from "@aihot/backend/content/materials";
 import { stopBoss } from "@aihot/backend/jobs/queue";
 import { publishArticle, publishArticleTx } from "@aihot/backend/publication/publish";
 import { candidates, composeDaily } from "@aihot/backend/reports/compose";
+import { v1Daily } from "@aihot/backend/publication/reports";
 
 const T = tag();
 const SOURCE = `test-report-boundary-${T}`;
@@ -24,10 +25,30 @@ before(async () => {
             VALUES (${SOURCE}, 'Report boundary test', 'rss', 'T1', 'editorial', '2100-01-01')`;
 });
 after(async () => {
-  await sql`DELETE FROM reports WHERE kind = 'daily' AND key IN ('2020-01-02', '2020-01-03', '2020-01-04', '2020-01-05')`;
+  await sql`DELETE FROM reports WHERE kind = 'daily' AND key IN ('2020-01-02', '2020-01-03', '2020-01-04', '2020-01-05', '2020-02-02')`;
   await provider.close();
   await stopBoss();
   await closeDb();
+});
+
+test('report windows follow arrival/release while citations and legacy v1 flashes keep source publication time', async () => {
+  const sourceAt = new Date('2020-02-01T12:00:00Z'), arrival = new Date('2020-02-01T20:00:00Z');
+  const { articleId } = await upsertMaterial({ sourceId: SOURCE, url: `https://example.com/${T}-source-date`, title: 'Source date fixture',
+    bodyText: 'Agent benchmark release', bodyStatus: 'ok', publishedAt: sourceAt, discoveredAt: arrival, via: 'fetch' });
+  await sql`INSERT INTO analyses (article_id,input_revision,origin,relevance,category,title_zh,summary_zh,score,selected)
+    VALUES (${articleId},1,'rule','pass','benchmarks','评测发布','原文早于本站到达的评测发布。',90,true)`;
+  await publishArticle(articleId, { now: arrival, releasedAt: arrival });
+  const boundary = new Date('2020-02-01T16:00:00Z');
+  assert.equal((await candidates(new Date('2020-02-01T00:00:00Z'), boundary)).some(c => c.itemId === articleId), false);
+  const found = (await candidates(boundary, new Date('2020-02-02T00:00:00Z'))).find(c => c.itemId === articleId);
+  assert.equal(found?.publishedAt, sourceAt.toISOString());
+  await composeDaily('2020-02-02');
+  const [r] = await sql`SELECT content FROM reports WHERE kind='daily' AND key='2020-02-02'`;
+  assert.equal(r!.content.sections.flatMap((s: any) => s.items).find((i: any) => i.itemId === articleId).publishedAt, sourceAt.toISOString());
+  // Emulate a pre-fix flash that stored arrival in the publication-date field.
+  const legacy = { sections: [], flashes: [{ itemId: articleId, title: '旧快讯', sourceName: 'test', sourceUrl: 'https://example.com', publishedAt: arrival.toISOString() }] };
+  await sql`UPDATE reports SET content=${sql.json(legacy)} WHERE kind='daily' AND key='2020-02-02'`;
+  assert.equal((await v1Daily('2020-02-02'))!.report.flashes[0]!.publishedAt, sourceAt.toISOString());
 });
 
 async function analyzed(label: string, timelineAt: string): Promise<string> {
