@@ -78,9 +78,41 @@ test('correction plans reject promotions, score changes, unbounded batches and l
   const spec = { articleId: 'fixture', url: 'https://example.org', expectedFingerprint: '0'.repeat(64), fields: { selected: true }, reason: 'Review' };
   await assert.rejects(correctQuality({ version: 1, corrections: [spec] }));
   await assert.rejects(correctQuality({ version: 1, corrections: [{ ...spec, fields: { score: 100 } }] }));
+  await assert.rejects(correctQuality({ version: 1, corrections: [{ ...spec, fields: {}, removeTags: ['论文研究'] }] }));
+  await assert.rejects(correctQuality({ version: 1, corrections: [{ ...spec, fields: {} }] }));
   await assert.rejects(correctQuality({ version: 1, corrections: Array(11).fill({ ...spec, fields: { selected: false } }) }));
   await assert.rejects(correctQuality({ version: 1, corrections: Array(2).fill({ ...spec, fields: { selected: false } }) }));
   process.env.MODEL_CALLS_ENABLED = 'true';
   try { await assert.rejects(correctionSnapshot(['fixture']), /both valves=false/); }
   finally { process.env.MODEL_CALLS_ENABLED = 'false'; }
+});
+
+test('reviewed tag removal preserves category, entities, scores and selection and is idempotent', async () => {
+  process.env.COLLECT_ENABLED = 'false'; process.env.MODEL_CALLS_ENABLED = 'false';
+  const source = `tag-removal-${tag()}`;
+  await sql`INSERT INTO sources (id,name,kind,tier,site_fulltext) VALUES (${source},'Tag fixture','external','T1',false)`;
+  const { articleId } = await upsertMaterial({ sourceId: source, url: `https://example.org/${source}`, title: 'Multi-agent evaluation',
+    bodyText: 'Several agents coordinate in controlled games.', bodyStatus: 'ok', via: 'import', backfill: 'test' });
+  try {
+    await sql`INSERT INTO analyses (article_id,input_revision,origin,relevance,category,tags,title_zh,summary_zh,score,selected)
+      VALUES (${articleId},1,'rule','pass','paper',${['论文研究','Multi-Agent','Generalist Agent','entity:openai']},'协作评测','多 Agent 在协作环境中完成任务。',82,true)`;
+    await publishArticle(articleId, { releasedAt: new Date(Date.now() - 3600000) });
+    const { snapshots } = await correctionSnapshot([articleId]);
+    const first = snapshots[0]!;
+    const plan = { version: 1, corrections: [{ articleId, url: first.url, expectedFingerprint: first.expectedFingerprint,
+      fields: {}, removeTags: ['Generalist Agent'], reason: '移除无明确任务证据的通用场景标签' }] };
+    assert.equal((await correctQuality(plan)).changed, 0);
+    assert.equal((await correctQuality(plan, true)).changed, 1);
+    const [p] = await sql`SELECT category,tags,score,selected FROM publications WHERE article_id=${articleId}`;
+    assert.deepEqual(p!.tags, ['论文研究','Multi-Agent','entity:openai']);
+    assert.equal(p!.category, 'paper'); assert.equal(p!.score, 82); assert.equal(p!.selected, true);
+    assert.equal((await correctQuality(plan, true)).changed, 0);
+    const [a] = await sql`SELECT tags FROM analyses WHERE article_id=${articleId}`;
+    assert.ok(a!.tags.includes('Generalist Agent'), 'model evidence stays unchanged');
+  } finally {
+    await sql`DELETE FROM audit_log WHERE subject=${`content:${articleId}`}`;
+    await sql`DELETE FROM selected_ledger WHERE article_id=${articleId}`;
+    await sql`DELETE FROM articles WHERE id=${articleId}`;
+    await sql`DELETE FROM sources WHERE id=${source}`;
+  }
 });

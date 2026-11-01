@@ -1,0 +1,16 @@
+# Merge with root compose for local reading or a server awaiting a separately authorized trial.
+services:
+  api:
+    environment: &site-only
+      COLLECT_ENABLED: "false"
+      MODEL_CALLS_ENABLED: "false"
+      FEISHU_CONTENT_PUSH_ENABLED: "false"
+      FEISHU_INTERNAL_ENABLED: "false"
+      INDEXNOW_SUBMIT_ENABLED: "false"
+  web:
+    environment: *site-only
+  worker:
+    profiles: ["automation"]
+    command: ["node", "industry/v0.1/site-only-worker.ts"]
+    restart: "no"
+    environment: *site-only

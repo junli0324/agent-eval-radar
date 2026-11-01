@@ -105,6 +105,23 @@ jobs:
           actual_sources=$(docker compose exec -T db psql -U aihot -d aihot -Atc "select count(*) from sources")
           test "$actual_sources" = "$expected_sources"
           test "$(docker compose ps --status running --services | sort | tr '\n' ' ')" = "api db web worker "
+      - name: Site-only defaults and bounded-worker override
+        run: |
+          site() { docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml "$@"; }
+          docker compose stop worker
+          # Simulate inherited paid valves: the site overlay must still close them for API/Web.
+          sed -i 's/^COLLECT_ENABLED=.*/COLLECT_ENABLED=true/; s/^MODEL_CALLS_ENABLED=.*/MODEL_CALLS_ENABLED=true/' .env
+          site up -d --no-build
+          test "$(site ps --status running --services | sort | tr '\n' ' ')" = "api db web "
+          site exec -T api node -e 'if(process.env.MODEL_CALLS_ENABLED!=="false" || process.env.COLLECT_ENABLED!=="false") process.exit(1)'
+          if site run --rm --no-deps worker > "$RUNNER_TEMP/site-worker.log" 2>&1; then
+            cat "$RUNNER_TEMP/site-worker.log"
+            exit 1
+          fi
+          node -e 'const fs=require("node:fs"); if(!fs.readFileSync(process.env.RUNNER_TEMP+"/site-worker.log","utf8").includes("site-only-worker-disabled")) process.exit(1)'
+          site run --rm --no-deps --entrypoint node setup scripts/smoke.ts --base http://web:3000
+          docker compose --profile automation -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.auto-trial.yml config --format json > "$RUNNER_TEMP/trial-compose.json"
+          node -e 'const fs=require("node:fs"),s=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/trial-compose.json","utf8")).services; if(s.worker.command[1]!=="industry/v0.1/auto-trial-worker.ts" || s.worker.environment.MODEL_CALLS_ENABLED!=="true" || s.api.environment.MODEL_CALLS_ENABLED!=="false" || s.web.environment.MODEL_CALLS_ENABLED!=="false") process.exit(1)'
       - name: Logs
         if: failure()
         run: docker compose logs --tail 80
