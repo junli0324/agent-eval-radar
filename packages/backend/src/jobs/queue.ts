@@ -45,7 +45,12 @@ const ensured = new Set<string>();
 export async function getBoss(): Promise<PgBoss> {
   if (boss) return boss;
   starting ??= (async () => {
-    const b = new PgBoss({ connectionString: config.databaseUrl, max: 4, schema: "pgboss", application_name: "aihot-jobs" });
+    // A bounded runner only sends jobs. pg-boss otherwise starts retention and persisted cron work
+    // even without application handlers, which would change the old queue during a limited trial.
+    const bounded = process.env.AGENT_EVAL_AUTO_TRIAL === 'true';
+    const exists = bounded ? (await sql`SELECT to_regclass('pgboss.job') IS NOT NULL AS present`)[0]!.present : false;
+    const b = new PgBoss({ connectionString: config.databaseUrl, max: 4, schema: "pgboss", application_name: "aihot-jobs",
+      ...(bounded ? { supervise: false, schedule: false, migrate: !exists } : {}) });
     b.on("error", (err) => console.error("[pg-boss]", err));
     await b.start();
     boss = b;
