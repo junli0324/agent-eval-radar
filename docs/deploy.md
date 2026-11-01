@@ -1,5 +1,7 @@
 # 部署
 
+AgentEval Radar 当前使用[仅浏览运行说明](../industry/v0.1/site-only-deploy.md)和[独立本地维护](../industry/v0.1/local-maintenance.md)。下列是框架通用部署流程，根 Compose 会启动普通 worker；到期试运行与日常阅读请使用项目专用配置。
+
 ## 用 Docker（推荐）
 
 需要一台装了 Docker（带 Compose）的机器。云服务器建议至少 2 核、4 GB 内存，构建镜像时要用到。
@@ -54,7 +56,7 @@ docker compose up -d --build
 
 ### 备份
 
-在 `.env` 里配置 `DB_BACKUP_STORE_*`（任何 S3 兼容的对象存储），每天 04:10 自动备份到那里。也可以手动导出：
+普通 worker 运行时，在 `.env` 里配置 `DB_BACKUP_STORE_*`（任何 S3 兼容的对象存储），每天 04:10 自动备份到那里。仅浏览模式使用上述独立维护服务生成宿主机本地副本；它尚不上传对象存储。也可以手动导出：
 
 ```bash
 docker compose exec -T db pg_dump -U aihot aihot | gzip > myhot-$(date +%F).sql.gz
