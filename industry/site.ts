@@ -16,6 +16,7 @@ export const SITE = {
   description: "面向中文 AI 产品经理、Agent 评测人员与开发者，追踪 Agent Evaluation 的 Benchmark、评测方法、论文、工具与实践。",
   /** 首页左上角和侧边栏下面的一行小字。 */
   tagline: "看懂 Agent 能力，先看评测证据",
+  allDateNote: "列表保留原文日期；本站新收录与修订请看顶部「内容更新」。历史补录保留原日期，不计入实时热点。",
   /** 界面语言（HTML lang、og:locale）。 */
   locale: "zh-CN",
   /** 默认域名，只在没设置 SITE_URL 时使用。 */

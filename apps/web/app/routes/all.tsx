@@ -115,6 +115,7 @@ export default function AllPage() {
         </div>
       )}
 
+      <p className="mb-4 text-[12.5px] leading-relaxed text-ink-3">{SITE.allDateNote}</p>
       <div className={`transition-opacity duration-200 ${busy ? "opacity-50" : ""}`}>
         {data.items.length === 0 ? (
           <div className="mt-2 lg:card">
