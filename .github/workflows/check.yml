@@ -122,9 +122,24 @@ jobs:
           site run --rm --no-deps --entrypoint node setup scripts/smoke.ts --base http://web:3000
           docker compose --profile automation -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.auto-trial.yml config --format json > "$RUNNER_TEMP/trial-compose.json"
           node -e 'const fs=require("node:fs"),s=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/trial-compose.json","utf8")).services; if(s.worker.command[1]!=="industry/v0.1/auto-trial-worker.ts" || s.worker.environment.MODEL_CALLS_ENABLED!=="true" || s.api.environment.MODEL_CALLS_ENABLED!=="false" || s.web.environment.MODEL_CALLS_ENABLED!=="false") process.exit(1)'
+      - name: Standalone local maintenance
+        run: |
+          export RADAR_BACKUP_DIR="$RUNNER_TEMP/radar-backups"
+          echo "RADAR_BACKUP_DIR=$RADAR_BACKUP_DIR" >> "$GITHUB_ENV"
+          sudo install -d -o 1000 -g 1000 -m 0700 "$RADAR_BACKUP_DIR"
+          maint() { docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.maintenance.yml "$@"; }
+          docker compose exec -T api node -e 'const fs=require("node:fs"); fs.mkdirSync("/data/uploads",{recursive:true}); fs.writeFileSync("/data/uploads/maintenance-fixture.txt","backup fixture")'
+          maint up -d --no-build api maintenance
+          for i in $(seq 1 90); do maint exec -T maintenance node industry/v0.1/maintenance.ts status --require-healthy > /dev/null 2>&1 && break; sleep 1; done
+          maint exec -T maintenance node industry/v0.1/maintenance.ts status --require-healthy
+          maint exec -T api node industry/v0.1/maintenance.ts status --require-healthy
+          maint exec -T maintenance node -e 'if(process.env.LLM_API_KEY || process.env.MODEL_CALLS_ENABLED!=="false") process.exit(1)'
+          maint exec -T maintenance node -e 'const fs=require("node:fs"); try { fs.writeFileSync("/data/maintenance-write-probe","unexpected"); process.exit(1); } catch(e) { if(!["EROFS","EACCES"].includes(e.code)) throw e; }'
+          maint exec -T maintenance node -e 'const fs=require("node:fs"),d=fs.readdirSync("/backups").filter(n=>n.startsWith("agent-eval-")); if(d.length!==1) process.exit(1); const m=JSON.parse(fs.readFileSync("/backups/"+d[0]+"/manifest.json","utf8")); if(!m.tables.length || !m.dump.sha256 || m.uploads.length!==1) process.exit(1)'
+          test "$(maint ps --status running --services | sort | tr '\n' ' ')" = "api db maintenance web "
       - name: Logs
         if: failure()
-        run: docker compose logs --tail 80
+        run: docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.maintenance.yml logs --tail 80
       - name: Stop
         if: always()
-        run: docker compose down -v
+        run: docker compose --profile '*' -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.maintenance.yml down -v --remove-orphans

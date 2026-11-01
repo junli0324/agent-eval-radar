@@ -9,10 +9,14 @@ import { ago, bj, duration, num } from "../../features/admin/format";
 import { AdminPage, Badge, Button, Card, DataTable, Dot, Empty, Field, Json, ReasonDialog, Select, Stat, Time } from "../../features/admin/ui";
 import type { AutomationOverview } from '@aihot/industry/automation';
 import { AutomationStatus, AUTOMATION_LABELS, automationTone } from '../../features/admin/AutomationStatus';
+import type { MaintenanceOverview } from '@aihot/industry/maintenance';
+import { MaintenanceStatus } from '../../features/admin/MaintenanceStatus';
 
 type Row = Record<string, any>;
 interface Runs {
   automation: AutomationOverview | null;
+  maintenance?: MaintenanceOverview | null;
+  siteOnly?: boolean;
   checkedAt: string;
   processes: Array<{ role: string; pid: number; host: string; release: string; startedAt: string; at: string; alive: boolean }>;
   jobs: Row[];
@@ -65,7 +69,8 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
       <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
         {r.automation ? <Stat label="受限自动运行" value={<span className="text-[18px]">{AUTOMATION_LABELS[r.automation.state]}</span>}
           tone={automationTone(r.automation.state) === 'bad' ? 'bad' : automationTone(r.automation.state) === 'warn' ? 'warn' : undefined}
-          hint={`授权截止 ${bj(r.automation.expiresAt)}`} /> : <Stat
+          hint={`授权截止 ${bj(r.automation.expiresAt)}`} /> : r.siteOnly && !worker?.alive ? <Stat
+          label="内容处理" value={<span className="text-[18px]">未启用</span>} hint="仅浏览模式；维护服务单独运行" /> : <Stat
           label="worker"
           value={<span className="inline-flex items-center gap-2 text-[18px]"><Dot tone={worker?.alive ? "ok" : "bad"} />{worker ? (worker.alive ? "运行中" : "心跳中断") : "无心跳"}</span>}
           hint={worker ? `${worker.host} · 心跳 ${ago(worker.at)}` : "worker 未上报心跳"}
@@ -77,6 +82,7 @@ export default function RunsAdmin({ loaderData }: Route.ComponentProps) {
       </div>
 
       {r.automation && <AutomationStatus value={r.automation} />}
+      {r.maintenance && <MaintenanceStatus value={r.maintenance} />}
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Card title="队列" pad={false}>

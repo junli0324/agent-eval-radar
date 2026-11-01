@@ -2,6 +2,7 @@
 services:
   api:
     environment: &site-only
+      AGENT_EVAL_SITE_ONLY: "true"
       COLLECT_ENABLED: "false"
       MODEL_CALLS_ENABLED: "false"
       FEISHU_CONTENT_PUSH_ENABLED: "false"

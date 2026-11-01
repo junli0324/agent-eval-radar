@@ -15,6 +15,7 @@ import { listBudgets, listTargets, replaceContactQr, setTargetEnabled, updateBud
 import { createSource, fetchNow, listSources, previewSource, sourceDetail, updateSource } from "@aihot/backend/admin/sources";
 import { sql } from "@aihot/backend/db";
 import { loadAutomationOverview } from "@aihot/industry/automation";
+import { loadMaintenanceOverview } from "@aihot/industry/maintenance";
 import { loadContact } from "@aihot/backend/site/contact";
 import { sendProblem } from "../http/respond.ts";
 import { adminHandler } from "./admin-auth.ts";
@@ -92,8 +93,8 @@ export function registerAdmin(app: FastifyInstance) {
 
   // Runs (F20)
   app.get("/api/admin/runs", adminHandler(async () => {
-    const [runs, automation] = await Promise.all([runsOverview(), loadAutomationOverview()]);
-    return { ...runs, automation };
+    const [runs, automation, maintenance] = await Promise.all([runsOverview(), loadAutomationOverview(), loadMaintenanceOverview()]);
+    return { ...runs, automation, maintenance, siteOnly: process.env.AGENT_EVAL_SITE_ONLY === 'true' };
   }));
   app.post("/api/admin/receipts/:id/release", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await releaseReceipt(Number(param(req, "id")), body(req) as never, actorOf(admin)))));
   app.post("/api/admin/deliveries/:id/resolve", adminHandler(async (req, reply, admin) => orNotFound(req, reply, await resolveDelivery(Number(param(req, "id")), body(req) as never, actorOf(admin)))));
