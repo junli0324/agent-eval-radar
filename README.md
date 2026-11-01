@@ -237,7 +237,7 @@ docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api
 
 CI 会执行类型检查、后端测试、Web 构建与测试、站点 smoke / MCP 检查，以及 Docker Compose 基础链路验证。测试关闭外部采集和真实模型调用；测试数据库必须以 `_test` 或 `_ci` 结尾。具体步骤见 [AGENTS.md](AGENTS.md) 与 [验证记录](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/validation.md)。**工程检查通过，不代表筛选准确率已经得到验证。**
 
-后续重点是建立独立人工 gold set：覆盖应入选、仅相关、应拦截和容易混淆的案例，分别检查预筛、精选、分类标签与摘要事实。将开发样本与最终评估集分开，先定位误筛原因，再调整提示词与门槛。当前试用目录不是独立测试集。
+当前由受托开发助手按既定范围完成具体材料的编辑判断、证据复核和分类标签检查，保留逐条理由，无须运营者填写标注表。独立人工 gold set 是后续检验实际筛选效果的更高强度方案；助手自检不冒充独立验证，当前试用目录不是独立测试集。保持开发样本与最终评估集分开，不凭少量自检调整门槛或宣称准确率。
 
 ## 文档导航
 
