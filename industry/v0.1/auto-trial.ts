@@ -109,6 +109,36 @@ export async function stopTrial() {
   });
 }
 
+/** A separately authorized round after expiry. Never restores a higher budget or clears receipts. */
+export async function startNextTrial(previousExpiresAt: string, now = new Date()) {
+  offlineValves();
+  if (!Number.isFinite(Date.parse(previousExpiresAt)) || new Date(previousExpiresAt).toISOString() !== previousExpiresAt) throw new Error('Use the exact previous expiresAt from status');
+  await verifyTrialModel();
+  return sql.begin(async tx => {
+    const [lock] = await tx`SELECT pg_try_advisory_xact_lock(hashtext(${TRIAL_LOCK})) AS locked`;
+    if (!lock!.locked) throw new Error('Stop the trial worker before starting the next round');
+    const before = await loadTrial(tx);
+    if (!before || before.version !== 1 || before.state !== 'active' || before.expiresAt !== previousExpiresAt) throw new Error('Previous trial does not match; no new round started');
+    if (!Number.isFinite(Date.parse(before.startedAt)) || Date.parse(before.startedAt) >= Date.parse(before.expiresAt) || +now < Date.parse(before.expiresAt)) throw new Error('Previous trial has not expired; no extension allowed');
+    const budget = await currentBudget(tx);
+    if (!budget || stableJson(budget) !== stableJson(before.budgetApplied)
+      || budget.per_minute <= 0 || budget.per_minute > 5 || budget.per_hour <= 0 || budget.per_hour > 30 || budget.per_day <= 0 || budget.per_day > TRIAL_DAY_CALLS) throw new Error('Existing bounded budget changed; review it before starting another round');
+    const sources = await tx`SELECT id FROM sources WHERE id IN ${tx(RECENT_SOURCES)} AND enabled
+      AND participation_mode = 'editorial' AND kind IN ('rss', 'web_list') AND NOT site_fulltext AND NOT syndicate_fulltext`;
+    if (!sources.length) throw new Error('No enabled summary-only trial sources');
+    const [last] = await tx`SELECT value FROM settings WHERE key = ${TRIAL_KEY + '.last-tick'}`;
+    const value: Trial = { version: 1, state: 'active', startedAt: now.toISOString(), expiresAt: new Date(+now + TRIAL_HOURS * 3600000).toISOString(),
+      budgetBefore: budget, budgetApplied: budget };
+    await tx`UPDATE settings SET value = ${tx.json(value as never)}, updated_by = 'local-auto-trial', updated_at = now() WHERE key = ${TRIAL_KEY}`;
+    await tx`DELETE FROM settings WHERE key = ${TRIAL_KEY + '.last-tick'}`;
+    await tx`INSERT INTO audit_log (actor, action, subject, reason, before, after)
+      VALUES ('local-auto-trial', 'trial.next', ${TRIAL_KEY}, 'Separately authorized 72-hour round; preserve current bounded budget and all request history',
+        ${tx.json({ trial: before, lastTick: last?.value ?? null } as never)}, ${tx.json(value as never)})`;
+    return { status: 'prepared-next', previousExpiresAt, startedAt: value.startedAt, expiresAt: value.expiresAt,
+      budget, sources: sources.map(s => s.id), historicalQueue: 'untouched-and-not-consumed', modelCalls: 0 };
+  });
+}
+
 export async function trialStatus() {
   const trial = await loadTrial();
   const [calls] = await sql`SELECT count(*)::int AS requests FROM receipt_attempts WHERE service = 'llm' AND origin = 'live' AND started_at > now() - interval '1 day'`;
@@ -269,8 +299,9 @@ export async function runTrialTick(options: { now?: Date; maintenance?: boolean;
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   try {
     const [command, ...extra] = process.argv.slice(2);
-    if (extra.length || !['prepare', 'status', 'stop'].includes(command ?? '')) throw new Error("Use prepare, status or stop");
-    console.log(JSON.stringify(command === 'prepare' ? await prepareTrial() : command === 'stop' ? await stopTrial() : { ...await trialStatus(), ...await trialDiagnostics() }, null, 2));
+    const previous = extra[0]?.startsWith('--previous-expires-at=') ? extra[0].slice('--previous-expires-at='.length) : null;
+    if (command === 'next' ? extra.length !== 1 || !previous : extra.length || !['prepare', 'status', 'stop'].includes(command ?? '')) throw new Error('Use prepare, status, stop, or next --previous-expires-at=<exact previous expiresAt>; next requires separate operator authorization');
+    console.log(JSON.stringify(command === 'next' ? await startNextTrial(previous!) : command === 'prepare' ? await prepareTrial() : command === 'stop' ? await stopTrial() : { ...await trialStatus(), ...await trialDiagnostics() }, null, 2));
   } catch (error) { console.error(error instanceof Error ? error.message : "Trial management failed"); process.exitCode = 1; }
   finally { await closeDb(); }
 }
