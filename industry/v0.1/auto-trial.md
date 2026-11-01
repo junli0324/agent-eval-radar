@@ -22,7 +22,7 @@ cd D:\Projects\agent-eval-radar
 docker compose stop worker
 git -c http.proxy=http://127.0.0.1:7897 -c http.version=HTTP/1.1 pull --ff-only origin feat/agent-eval-v0.1
 docker compose build api
-docker compose up -d --no-deps api web
+docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.maintenance.yml up -d --no-deps api web maintenance
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/blog-sources.ts
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/frontier-sources.ts
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts prepare
@@ -39,6 +39,20 @@ docker compose logs --tail=30 worker
 状态查询还输出 `sourceHealth`、`missingSources` 和 `pipeline`，可区分 HTTP 304、无新增、被拦截与正文未就绪；详见[诊断说明](frontier-sources.md#直接看原因)。状态输出试运行截止时间、滚动 24 小时实际请求次数、试运行回执 token、未知费用回执数和最后一轮结果。`modelCalls: 0` 仅表示这条状态查询本身不调用模型，不表示后台没有费用。账单以 DeepSeek 为准。关闭 PowerShell 不影响后台容器；睡眠、关机或代理断开会影响连续运行。非正常退出最多重启三次；到期正常退出不重启。
 
 到期后先做[只读复盘](trial-review.md)，核对退出状态、实际请求尝试（含重试）、报告与提供商账单。保存的 `state: active` 不代表时间窗口仍有效，以 `active` 和 `expiresAt` 为准。到期不会自动恢复更高的旧预算，也不授权下一轮。
+
+## 单独授权后的下一轮
+
+只有运营者明确批准新的 72 小时范围后，才使用 `next`。先核对原 worker 已退出，保存只读复盘及本地备份；从 `status` 复制旧轮的完整 `expiresAt`。不要先运行 `stop` 恢复较高预算。
+
+```powershell
+# 将下列时间替换为 status 中已核对的旧轮 expiresAt；此例是项目第一轮。
+docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts next --previous-expires-at=2026-10-24T14:15:31.061Z
+docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml -f industry/v0.1/compose.maintenance.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
+```
+
+`next` 仅接受已到期且与指定截止时间完全匹配的轮次，核对原预算仍在 5/30/100 或更低范围。整个事务不修改预算、回执、信源或队列；旧授权与最后一轮运行结果完整保留在 `trial.next` 审计中，新窗口从命令成功时算 72 小时。新轮的预算恢复快照取当前受限值，不继承更高的旧快照。重复执行旧命令不能再次延期；普通 `prepare` 的不延期规则保留。
+
+本轮验收与跨日抽检见[72 小时验收说明](acceptance-trial.md)。本地仍须电脑、Docker、代理保持运行；Codex 定时抽检另外需要桌面应用运行。停机时间不顺延授权窗口。
 
 ## 停止与恢复预算
 
