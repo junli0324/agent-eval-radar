@@ -1,6 +1,6 @@
 # 有证据的定点内容修订
 
-`quality-corrections.ts` 用于少量已经人工核验的标题、摘要修正，以及将文章移出精选。复用现有 `editorial_overrides`、发布投影和同步 ledger，不新增数据库结构。它不重新评分、采集或调用模型，不调整预算或授权，不自动重写报告/事件综述。
+`quality-corrections.ts` 用于少量已经核验证据的标题、摘要修正、移出精选及移除无依据的能力标签。复用现有 `editorial_overrides`、发布投影和同步 ledger，不新增数据库结构。它不重新评分、采集或调用模型，不调整预算或授权，不自动重写报告/事件综述。
 
 ## 先冻结当前状态
 
@@ -10,7 +10,7 @@
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/quality-corrections.ts snapshot --ids=文章ID1,文章ID2
 ```
 
-最多 10 个明确 ID，输出每篇当前标题、摘要、精选状态、评分与 `expectedFingerprint`。指纹覆盖已存原材料、分析、来源配置、发布投影和人工设置；不会输出原文正文或模型回执。只对已有、当前版本的可读公开材料修订。
+最多 10 个明确 ID，输出每篇当前标题、摘要、标签、精选状态、评分与 `expectedFingerprint`。指纹覆盖已存原材料、分析、来源配置、发布投影和人工设置；不会输出原文正文或模型回执。只对已有、当前版本的可读公开材料修订。
 
 按证据编写本地 JSON 计划，保存在被忽略的 `.data/`。格式：
 
@@ -29,7 +29,9 @@ docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api
 }
 ```
 
-`fields` 只接受 `title`、非空 `summary`、`selected: false`。禁止提高精选、改评分、改分类标签或可见性。已有人工修正与目标字段冲突时停止，不覆盖；其他人工字段合并保留。若确实需要更改已有人工判断，先用既有后台检查并明确处理。
+`fields` 只接受 `title`、非空 `summary`、`selected: false`。另可在单条计划的顶层写 `"removeTags": ["Generalist Agent"]`；仅移除现有场景/能力词表中的明确标签，不能新增标签、移除分类标签或实体。仅删标签时传 `"fields": {}`。
+
+禁止提高精选、改评分、改分类或可见性。已有人工修正与目标字段冲突时停止，不覆盖；其他人工字段合并保留。若确实需要更改已有人工判断，先检查原因和当前版本再明确处理。
 
 ## 预览与执行
 
@@ -40,7 +42,7 @@ docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/quality-corrections.ts apply --plan=/data/quality-plan.json
 ```
 
-执行前备份，见[备份与隔离恢复](backup-restore.md)。数据库里任一指纹不匹配或人工编辑冲突，整批不提交。写入和发布在同一事务中，保留审计前后值；验证评分、分类、标签、日期、补录、资格与可见性不变，仅显式 `selected: false` 可降低精选。相同计划重试会核对执行后的指纹并跳过，不重复新增审计或同步项；之后有新编辑则重新停止。
+执行前备份，见[备份与隔离恢复](backup-restore.md)。数据库里任一指纹不匹配或人工编辑冲突，整批不提交。写入和发布在同一事务中，保留审计前后值；验证评分、分类、日期、补录、资格与可见性不变，标签仅允许声明的移除，精选仅允许显式降低。相同计划重试会核对执行后的指纹并跳过，不重复新增审计或同步项；之后有新编辑则重新停止。
 
 标题/摘要修正通过统一发布读取层到达详情、列表、API、RSS、MCP 与精选同步；移出精选产生 ledger remove。归档报告或已经生成的事件综述可能保存旧文字，执行者必须另外检查受影响引用，不能把重新生成它们视为已获得付费授权。网页缓存到期或刷新后核对实际文字和精选状态。
 

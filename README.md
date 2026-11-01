@@ -136,11 +136,11 @@ INDEXNOW_SUBMIT_ENABLED=false
 ```
 
 ```powershell
-docker compose up -d --build db api web
+docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml up -d --build
 docker compose ps
 ```
 
-打开 **<http://localhost:3000>**；后台为 **<http://localhost:3000/admin>**，管理员密码见本地 `.env` 的 `ADMIN_PASSWORD`。此阶段没有模型费用，页面尚无文章是正常现象。
+打开 **<http://localhost:3000>**；后台为 **<http://localhost:3000/admin>**，管理员密码见本地 `.env` 的 `ADMIN_PASSWORD`。这份[仅浏览配置](industry/v0.1/site-only-deploy.md)默认不启动 worker，并关闭 API/Web 的采集和模型阀门；页面尚无文章是正常现象。
 
 ### 3. 选择内容入口
 
@@ -200,12 +200,11 @@ docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api
 打开 Docker Desktop，等待引擎就绪；使用代理联网时也要开启代理。在项目目录执行：
 
 ```powershell
-docker compose up -d db api web
-docker compose -f docker-compose.yml -f industry/v0.1/compose.auto-trial.yml up -d --no-deps worker
+docker compose -f docker-compose.yml -f industry/v0.1/compose.site-only.yml up -d db api web
 docker compose exec -T -e COLLECT_ENABLED=false -e MODEL_CALLS_ENABLED=false api node industry/v0.1/auto-trial.ts status
 ```
 
-未到期的试运行会继续；到期则不会启动新任务。停机期间的资讯不保证全部补齐。普通停止或重启会保留数据卷；不要执行 `docker compose down -v`，它会删除本地数据库卷。
+网站恢复后可继续阅读。已有有效授权的自动处理按试运行说明另行启动；到期不会因重启续期。停机期间的资讯不保证全部补齐。普通停止或重启会保留数据卷；不要执行 `docker compose down -v`，它会删除本地数据库卷。
 
 </details>
 
@@ -248,6 +247,7 @@ CI 会执行类型检查、后端测试、Web 构建与测试、站点 smoke / M
 | [论文与实践信源扩充](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/frontier-sources.md) | 已有试运行升级、来源取舍与停更诊断 |
 | [站内内容更新提示](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/content-updates.md) | 未查看数量、文章与报告直达、浏览器查看记录 |
 | [三天受限自动运行](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/auto-trial.md) | 启动、状态、停止、预算与运行边界 |
+| [仅浏览与服务器运行基线](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/site-only-deploy.md) | 默认不启动 worker、误启动拒绝、与受限入口组合、迁移准备 |
 | [到期后的只读复盘](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/trial-review.md) | 实际请求、未知费用、公开内容与报告诊断；不续期、不调用模型 |
 | [第一批可靠性改进](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/reliability-update.md) | 完整摘要、离线回放、报告优先、额度退避与后台只读状态 |
 | [备份与隔离恢复](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/backup-restore.md) / [内容抽检](https://github.com/junli0324/agent-eval-radar/blob/feat/agent-eval-v0.1/industry/v0.1/content-quality-review.md) | 部署前数据恢复验收、20 条材料与报告修订清单 |
